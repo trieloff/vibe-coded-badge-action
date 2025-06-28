@@ -1,6 +1,6 @@
 # Vibe Coded Badge Action
 
-[![100% Vibe_Coded](https://img.shields.io/badge/100%25-Vibe_Coded-ff69b4?style=for-the-badge&logo=claude&logoColor=white)](https://github.com)
+[![90% Vibe_Coded](https://img.shields.io/badge/90%25-Vibe_Coded-ff69b4?style=for-the-badge&logo=claude&logoColor=white)](https://github.com)
 
 A GitHub Action that automatically analyzes your repository's git history to determine what percentage of commits were made by AI tools, and updates a badge in your README accordingly.
 
@@ -120,7 +120,7 @@ This outputs:
 
 The action generates badges like this:
 
-[![100% Vibe_Coded](https://img.shields.io/badge/100%25-Vibe_Coded-ff69b4?style=for-the-badge&logo=claude&logoColor=white)](https://github.com)
+[![90% Vibe_Coded](https://img.shields.io/badge/90%25-Vibe_Coded-ff69b4?style=for-the-badge&logo=claude&logoColor=white)](https://github.com)
 
 ## Git Aliases for AI Coding Tools
 
