@@ -255,6 +255,11 @@ if ! $DEBUG; then
     git config user.email 'github-actions[bot]@users.noreply.github.com'
     git add "$README_PATH"
     git commit -m "$COMMIT_MESSAGE to ${PERCENT}% [skip vibe-badge]"
+    
+    # Push the changes if we're in GitHub Actions
+    if [ -n "${GITHUB_ACTIONS:-}" ]; then
+      git push origin HEAD
+    fi
   fi
 fi
 

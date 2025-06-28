@@ -31,8 +31,3 @@ jobs:
         badge-color: 'ff69b4'
         badge-text: 'Vibe_Coded'
         commit-message: 'Update vibe-coded badge'
-        
-    - name: Push changes
-      if: steps.update-badge.outputs.changed == 'true'
-      run: |
-        git push origin ${{ github.ref_name }}
