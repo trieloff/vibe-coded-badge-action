@@ -36,13 +36,13 @@ jobs:
       with:
         fetch-depth: 0
         
-    - uses: trieloff/vibe-coded-badge-action@v1
+    - uses: trieloff/vibe-coded-badge-action@main
 ```
 
 ### Advanced Usage
 
 ```yaml
-    - uses: trieloff/vibe-coded-badge-action@v1
+    - uses: trieloff/vibe-coded-badge-action@main
       with:
         readme-path: 'docs/README.md'
         badge-style: 'flat-square'
@@ -104,7 +104,7 @@ The badge automatically selects the appropriate logo based on which AI tool has 
 Enable debug mode to see detailed analysis:
 
 ```yaml
-    - uses: trieloff/vibe-coded-badge-action@v1
+    - uses: trieloff/vibe-coded-badge-action@main
       with:
         debug: 'true'
 ```
@@ -121,6 +121,62 @@ This outputs:
 The action generates badges like this:
 
 [![85% Vibe Coded](https://img.shields.io/badge/85%25-Vibe_Coded-ff69b4?style=for-the-badge&logo=claude&logoColor=white)](https://github.com/user/repo)
+
+## Git Aliases for AI Coding Tools
+
+To improve AI detection accuracy, you can set up git aliases that automatically set the author name for different AI coding tools. This ensures commits are properly attributed and detected by the badge action.
+
+### Recommended Aliases
+
+Add these aliases to your git config to make AI tool detection more reliable:
+
+```bash
+# Claude Code commits
+git config --global alias.claude-commit '!f() { msg="$1"; shift 1; git -c user.name="Claude Code" -c user.email="noreply@anthropic.com" -c commit.gpgsign=false commit -m "$msg" -m "Signed-off-by: $(git config user.name) <$(git config user.email)>" "$@"; }; f'
+
+# Zed AI commits  
+git config --global alias.zed-commit '!f() { msg="$1"; shift 1; git -c user.name="Zed AI" -c user.email="noreply@zed.dev" -c commit.gpgsign=false commit -m "$msg" -m "Signed-off-by: $(git config user.name) <$(git config user.email)>" "$@"; }; f'
+
+# Cursor commits
+git config --global alias.cursor-commit '!f() { msg="$1"; shift 1; git -c user.name="Cursor AI" -c user.email="noreply@cursor.com" -c commit.gpgsign=false commit -m "$msg" -m "Signed-off-by: $(git config user.name) <$(git config user.email)>" "$@"; }; f'
+
+# Windsurf commits
+git config --global alias.windsurf-commit '!f() { msg="$1"; shift 1; git -c user.name="Windsurf AI" -c user.email="noreply@codeium.com" -c commit.gpgsign=false commit -m "$msg" -m "Signed-off-by: $(git config user.name) <$(git config user.email)>" "$@"; }; f'
+
+# OpenAI Codex commits
+git config --global alias.openai-commit '!f() { msg="$1"; shift 1; git -c user.name="OpenAI Codex" -c user.email="noreply@openai.com" -c commit.gpgsign=false commit -m "$msg" -m "Signed-off-by: $(git config user.name) <$(git config user.email)>" "$@"; }; f'
+```
+
+### Usage
+
+Instead of regular `git commit`, use the AI-specific aliases:
+
+```bash
+# Instead of: git commit -m "Add new feature"
+git claude-commit "Add new feature"
+
+# Instead of: git commit -m "Fix bug in parser"  
+git zed-commit "Fix bug in parser"
+
+# Instead of: git commit -m "Refactor database layer"
+git cursor-commit "Refactor database layer"
+```
+
+### Benefits
+
+- **Accurate Attribution**: Each AI tool gets proper credit in git history
+- **Better Detection**: The badge action can distinguish between different AI tools
+- **Dynamic Logos**: Badge automatically shows the logo of the dominant AI tool
+- **Co-authorship**: Your name appears as co-author while AI gets primary credit
+- **Consistent Format**: Standardized commit attribution across projects
+
+### Alternative: Manual Override
+
+You can also manually set the author for individual commits:
+
+```bash
+git -c user.name="Claude Code" -c user.email="noreply@anthropic.com" commit -m "Your message"
+```
 
 ## Prerequisites
 
