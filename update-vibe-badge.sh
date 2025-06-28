@@ -231,17 +231,20 @@ if ! $DEBUG; then
   fi
 
   NEW_BADGE="[![${PERCENT}% ${BADGE_TEXT}](https://img.shields.io/badge/${PERCENT}%25-${BADGE_TEXT}-${BADGE_COLOR}?style=${BADGE_STYLE}&logo=${LOGO}&logoColor=white)](${GITHUB_URL})"
-  ESC_BADGE=$(printf '%s\n' "$NEW_BADGE" | sed 's/[#&]/\\&/g')
+  
+  # Export badge for perl to use
+  export NEW_BADGE
+  export BADGE_TEXT
 
-  # Try to replace existing badge first
-  perl -0pi -e "s#\[!\[\d+% ${BADGE_TEXT}\]\(https://img\.shields\.io/badge/\d+%25-${BADGE_TEXT}-[^?]*\?[^)]*\)\]\([^)]*\)#$ESC_BADGE#g" "$README_PATH"
+  # Try to replace existing badge first (handle both spaces and underscores in alt text)
+  perl -0pi -e 's#\[!\[\d+%[ _]Vibe[ _]Coded\]\(https://img\.shields\.io/badge/\d+%25-Vibe_Coded-[^?]*\?[^)]*\)\]\([^)]*\)#$ENV{NEW_BADGE}#g' "$README_PATH"
 
   # If no badge was replaced, insert after the main heading
   if ! git diff --quiet "$README_PATH"; then
     BADGE_CHANGED=true
   else
     # Insert badge after the first heading (# Title)
-    perl -0pi -e "s/^(# [^\n]+)\n/\$1\n\n$ESC_BADGE\n/" "$README_PATH"
+    perl -0pi -e 's/^(# [^\n]+)\n/$1\n\n$ENV{NEW_BADGE}\n/' "$README_PATH"
     if ! git diff --quiet "$README_PATH"; then
       BADGE_CHANGED=true
     fi
