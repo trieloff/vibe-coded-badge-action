@@ -241,7 +241,7 @@ if ! $DEBUG; then
     BADGE_CHANGED=true
   else
     # Insert badge after the first heading (# Title)
-    perl -0pi -e "s/^(# [^\n]+)\n/$1\n\n$ESC_BADGE\n/" "$README_PATH"
+    perl -0pi -e "s/^(# [^\n]+)\n/\$1\n\n$ESC_BADGE\n/" "$README_PATH"
     if ! git diff --quiet "$README_PATH"; then
       BADGE_CHANGED=true
     fi
