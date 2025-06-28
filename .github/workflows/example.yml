@@ -1,0 +1,37 @@
+name: Update Vibe Coded Badge
+
+on:
+  push:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  update-badge:
+    runs-on: ubuntu-latest
+    
+    # Skip if commit message contains [skip vibe-badge]
+    if: "!contains(github.event.head_commit.message, '[skip vibe-badge]')"
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0  # Full history needed for analysis
+        token: ${{ secrets.GITHUB_TOKEN }}
+        
+    - name: Update Vibe Coded Badge
+      uses: ./
+      with:
+        readme-path: 'README.md'
+        badge-style: 'for-the-badge'
+        badge-color: 'ff69b4'
+        badge-text: 'Vibe_Coded'
+        commit-message: 'Update vibe-coded badge'
+        
+    - name: Push changes
+      if: steps.update-badge.outputs.changed == 'true'
+      run: |
+        git push origin ${{ github.ref_name }}

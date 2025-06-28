@@ -1,0 +1,60 @@
+name: 'Vibe Coded Badge'
+description: 'Automatically updates a badge showing what percentage of your repository was coded by AI'
+author: 'Lars Trieloff'
+
+inputs:
+  readme-path:
+    description: 'Path to the README file to update'
+    required: false
+    default: 'README.md'
+  badge-style:
+    description: 'Badge style (flat, flat-square, plastic, for-the-badge, social)'
+    required: false
+    default: 'for-the-badge'
+  badge-color:
+    description: 'Badge color (hex code without #)'
+    required: false
+    default: 'ff69b4'
+  badge-text:
+    description: 'Text to display after percentage'
+    required: false
+    default: 'Vibe_Coded'
+  commit-message:
+    description: 'Commit message for badge updates'
+    required: false
+    default: 'Update vibe-coded badge'
+  debug:
+    description: 'Enable debug mode for detailed analysis'
+    required: false
+    default: 'false'
+  github-token:
+    description: 'GitHub token for pushing changes'
+    required: false
+    default: ${{ github.token }}
+
+outputs:
+  percentage:
+    description: 'The calculated percentage of AI-coded commits'
+  changed:
+    description: 'Whether the badge was changed (true/false)'
+  dominant-ai:
+    description: 'The AI tool with the most commits'
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Update Vibe Coded Badge
+      run: ${{ github.action_path }}/update-vibe-badge.sh
+      shell: bash
+      env:
+        README_PATH: ${{ inputs.readme-path }}
+        BADGE_STYLE: ${{ inputs.badge-style }}
+        BADGE_COLOR: ${{ inputs.badge-color }}
+        BADGE_TEXT: ${{ inputs.badge-text }}
+        COMMIT_MESSAGE: ${{ inputs.commit-message }}
+        DEBUG: ${{ inputs.debug }}
+        GITHUB_TOKEN: ${{ inputs.github-token }}
+
+branding:
+  icon: 'trending-up'
+  color: 'purple'
