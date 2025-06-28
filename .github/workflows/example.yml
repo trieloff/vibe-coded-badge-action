@@ -23,6 +23,7 @@ jobs:
         token: ${{ secrets.GITHUB_TOKEN }}
         
     - name: Update Vibe Coded Badge
+      id: update-badge
       uses: ./
       with:
         readme-path: 'README.md'
