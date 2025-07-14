@@ -237,18 +237,28 @@ if ! $DEBUG; then
   export BADGE_TEXT
 
   # Clean up any existing vibe-coded badges and insert new one
-  perl -0777 -pi -e '
+  if perl -0777 -pi -e '
     my $content = $_;
-    # Remove all existing vibe-coded badges
-    my $badge_re = qr#\[!\[\d+%[ _][^\]]*\]\(https://img\.shields\.io/badge/\d+%25-[^-]+-[^?]*\?[^)]*\)\]\([^)]*\)#s;
+    # Remove all existing vibe-coded badges (more flexible pattern)
+    my $badge_re = qr#\[!\[\d+%[ _][^\]]*Vibe[ _]Coded[^\]]*\]\(https://img\.shields\.io/badge/\d+%25[^)]*\)\]\([^)]*\)#s;
     $content =~ s/$badge_re\s*//g;
     # Clean up excessive newlines
     $content =~ s/\n{3,}/\n\n/g;
-    # Insert new badge after first heading
-    $content =~ s/^(# [^\n]+)\n/$1\n\n$ENV{NEW_BADGE}\n/;
+    
+    # Try to insert after first heading, fallback to beginning if no heading
+    if ($content =~ /^(#+ [^\n]+)\n/m) {
+      $content =~ s/^(#+ [^\n]+)\n/$1\n\n$ENV{NEW_BADGE}\n/m;
+    } else {
+      # Fallback: insert at the beginning
+      $content = "$ENV{NEW_BADGE}\n\n$content";
+    }
     $_ = $content;
-  ' "$README_PATH"
-  BADGE_CHANGED=true
+  ' "$README_PATH"; then
+    BADGE_CHANGED=true
+  else
+    echo "Error: Failed to update badge in $README_PATH"
+    exit 1
+  fi
 
   if $BADGE_CHANGED; then
     git config user.name 'github-actions[bot]'
