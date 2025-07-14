@@ -68,23 +68,25 @@ jobs:
 
 | Output | Description |
 |--------|-------------|
-| `percentage` | The calculated percentage of AI-coded commits |
+| `percentage` | The calculated percentage of AI-generated lines of code |
 | `changed` | Whether the badge was changed (true/false) |
-| `dominant-ai` | The AI tool with the most commits |
+| `dominant-ai` | The AI tool with the most lines of code |
 
 ## AI Detection Logic
 
-The action identifies AI-generated commits by analyzing:
+The action identifies AI-generated code by analyzing git blame data:
 
-1. **Author Names**: Checks for Claude, Cursor, Zed, Windsurf, OpenAI in commit authors
-2. **Commit Messages**: Looks for patterns like:
-   - 🤖 emoji
-   - "generated with"
-   - "co-authored-by" with AI tools
-   - "signed-off-by" with AI tools
-3. **Bot Accounts**: Detects `[bot]` accounts like renovate[bot], semantic-release[bot]
-4. **Branch Names**: Identifies commits on branches containing "codex"
-5. **Merge Commits**: Detects pull requests from codex branches
+1. **Author Attribution**: Uses `git blame` to determine who wrote each line of code
+2. **AI Tool Detection**: Identifies authors with names/emails containing:
+   - Claude, Anthropic
+   - Cursor
+   - Zed
+   - Windsurf
+   - OpenAI
+   - Various bot accounts
+3. **Line Filtering**: Filters out boilerplate lines (comments, empty lines, imports) for accuracy
+4. **File Type Support**: Analyzes source files across multiple programming languages
+5. **Bot Detection**: Identifies automated commits from tools like Renovate, semantic-release
 
 ## Logo Selection
 
@@ -110,11 +112,11 @@ Enable debug mode to see detailed analysis:
 ```
 
 This outputs:
-- Total commit breakdown
-- AI vs human commit counts  
-- Detailed list of each commit type
+- Total lines of code analyzed
+- AI vs human line counts  
+- Breakdown by AI tool type
 - Selected logo information
-- Chronological commit analysis
+- File type analysis
 
 ## Example Badge
 
