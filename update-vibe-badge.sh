@@ -14,198 +14,186 @@ if [[ "${1:-}" == "--debug" || "${1:-}" == "-d" || "$DEBUG" == "true" ]]; then
   DEBUG=true
 fi
 
-TOTAL=$(git rev-list --count HEAD)
-VIBE=0
+# Line-based calculation using git blame
+TOTAL_LINES=0
+AI_LINES=0
 
-# Arrays to store commits by type
-declare -a AI_COMMITS=()
-declare -a HUMAN_COMMITS=()
+# Initialize line counts by AI type
+CLAUDE_LINES=0
+CURSOR_LINES=0
+WINDSURF_LINES=0
+ZED_LINES=0
+OPENAI_LINES=0
+BOT_LINES=0
+RENOVATE_LINES=0
+SEMANTIC_LINES=0
 
-# Counters for each AI type
-CLAUDE_COUNT=0
-CODEX_COUNT=0
-WINDSURF_COUNT=0
-CURSOR_COUNT=0
-ZED_COUNT=0
-OPENAI_COUNT=0
-BOT_COUNT=0
-RENOVATE_COUNT=0
-SEMANTIC_COUNT=0
+# Find all relevant source files
+SOURCE_FILES=$(find . -type f \
+  \( -name "*.js" -o -name "*.ts" -o -name "*.jsx" -o -name "*.tsx" \
+  -o -name "*.py" -o -name "*.sh" -o -name "*.bash" -o -name "*.zsh" \
+  -o -name "*.md" -o -name "*.json" -o -name "*.yml" -o -name "*.yaml" \
+  -o -name "*.swift" -o -name "*.go" -o -name "*.rs" -o -name "*.java" \
+  -o -name "*.cpp" -o -name "*.c" -o -name "*.h" -o -name "*.hpp" \
+  -o -name "*.rb" -o -name "*.php" -o -name "*.css" -o -name "*.scss" \
+  -o -name "*.html" -o -name "*.xml" -o -name "*.sql" \) \
+  -not -path "./.git/*" \
+  -not -path "./node_modules/*" \
+  -not -path "./.build/*" \
+  -not -path "./dist/*" \
+  -not -path "./build/*" \
+  -not -path "./vendor/*" \
+  -not -name "*.min.js" -not -name "*.min.css" 2>/dev/null)
 
-for COMMIT in $(git rev-list HEAD); do
-  AUTHOR="$(git show -s --format='%an <%ae>' "$COMMIT")"
-  BODY="$(git show -s --format='%B' "$COMMIT")"
-  SUBJECT="$(git show -s --format='%s' "$COMMIT")"
-  DATE="$(git show -s --format='%ad' --date=short "$COMMIT")"
-  
-  IS_AI=false
-  AI_TYPE=""
-  
-  # Check if commit is on a codex branch
-  BRANCHES="$(git branch --contains "$COMMIT" --all 2>/dev/null | grep -E 'remotes/origin/.*codex/' || true)"
-  
-  # Check for Renovate bot commits
-  if echo "$AUTHOR" | grep -F 'renovate[bot]' >/dev/null; then
-    VIBE=$((VIBE + 1))
-    IS_AI=true
-    AI_TYPE="Renovate"
-  # Check for semantic-release bot commits
-  elif echo "$AUTHOR" | grep -E 'semantic-release-bot|semantic-release\[bot\]' >/dev/null; then
-    VIBE=$((VIBE + 1))
-    IS_AI=true
-    AI_TYPE="Semantic"
-  # Check for other bot commits
-  elif echo "$AUTHOR" | grep -F '[bot]' >/dev/null; then
-    VIBE=$((VIBE + 1))
-    IS_AI=true
-    AI_TYPE="Bot"
-  # Check for AI-generated commits by author or message content
-  elif echo "$AUTHOR" | grep -iE 'claude|cursor|zed|windsurf|openai' >/dev/null \
-     || echo "$BODY" | grep -iE '🤖|generated with|co-?authored-?by:.*(claude|cursor|zed|windsurf|openai)|signed-off-by:.*(claude|cursor|zed|windsurf|openai)' >/dev/null; then
-    VIBE=$((VIBE + 1))
-    IS_AI=true
-    if echo "$AUTHOR" | grep -i 'claude' >/dev/null || echo "$BODY" | grep -i 'claude' >/dev/null; then
-      AI_TYPE="Claude"
-    elif echo "$AUTHOR" | grep -i 'cursor' >/dev/null || echo "$BODY" | grep -i 'cursor' >/dev/null; then
-      AI_TYPE="Cursor"
-    elif echo "$AUTHOR" | grep -i 'windsurf' >/dev/null || echo "$BODY" | grep -i 'windsurf' >/dev/null; then
-      AI_TYPE="Windsurf"
-    elif echo "$AUTHOR" | grep -i 'zed' >/dev/null || echo "$BODY" | grep -i 'zed' >/dev/null; then
-      AI_TYPE="Zed"
-    elif echo "$AUTHOR" | grep -i 'openai' >/dev/null || echo "$BODY" | grep -i 'openai' >/dev/null; then
-      AI_TYPE="OpenAI"
-    else
-      AI_TYPE="Unknown AI"
-    fi
-  # Check for Codex commits (merge commits or any commit on codex branches)
-  elif echo "$BODY" | grep -E '^Merge pull request .* from .*/.*codex/.*' >/dev/null || [ -n "$BRANCHES" ]; then
-    VIBE=$((VIBE + 1))
-    IS_AI=true
-    AI_TYPE="Codex"
-  fi
-  
-  # Count AI commits by type
-  if $IS_AI && [ -n "$AI_TYPE" ]; then
-    case "$AI_TYPE" in
-      "Claude") CLAUDE_COUNT=$((CLAUDE_COUNT + 1)) ;;
-      "Codex") CODEX_COUNT=$((CODEX_COUNT + 1)) ;;
-      "Windsurf") WINDSURF_COUNT=$((WINDSURF_COUNT + 1)) ;;
-      "Cursor") CURSOR_COUNT=$((CURSOR_COUNT + 1)) ;;
-      "Zed") ZED_COUNT=$((ZED_COUNT + 1)) ;;
-      "OpenAI") OPENAI_COUNT=$((OPENAI_COUNT + 1)) ;;
-      "Bot") BOT_COUNT=$((BOT_COUNT + 1)) ;;
-      "Renovate") RENOVATE_COUNT=$((RENOVATE_COUNT + 1)) ;;
-      "Semantic") SEMANTIC_COUNT=$((SEMANTIC_COUNT + 1)) ;;
-    esac
-  fi
-  
-  if $DEBUG; then
-    if $IS_AI; then
-      AI_COMMITS+=("$(printf "%-7s | %-10s | %-40.40s | %s" "$COMMIT" "$AI_TYPE" "$SUBJECT" "$DATE")")
-    else
-      HUMAN_COMMITS+=("$(printf "%-7s | %-40.40s | %s" "$COMMIT" "$SUBJECT" "$DATE")")
-    fi
+# Process each source file
+for FILE in $SOURCE_FILES; do
+  if [ -f "$FILE" ] && [ -r "$FILE" ]; then
+    # Use git blame to analyze each line
+    while IFS= read -r LINE; do
+      if [[ -n "$LINE" ]]; then
+        # Extract author from git blame
+        AUTHOR=$(git blame --line-porcelain "$FILE" | grep -A1 "^author " | tail -n1 | cut -d' ' -f2-)
+        AUTHOR_EMAIL=$(git blame --line-porcelain "$FILE" | grep -A1 "^author-mail " | tail -n1 | cut -d' ' -f2- | tr -d '<>')
+        
+        # Skip empty lines and obvious boilerplate
+        if [[ -n "$(echo "$LINE" | tr -d '[:space:]')" ]] && 
+           [[ ! "$LINE" =~ ^[[:space:]]*# ]] && 
+           [[ ! "$LINE" =~ ^[[:space:]]*// ]] &&
+           [[ ! "$LINE" =~ ^[[:space:]]*\* ]] &&
+           [[ ! "$LINE" =~ ^[[:space:]]*\*/ ]] &&
+           [[ ! "$LINE" =~ ^[[:space:]]*import\  ]] &&
+           [[ ! "$LINE" =~ ^[[:space:]]*package\  ]] &&
+           [[ ! "$LINE" =~ ^[[:space:]]*\{?[[:space:]]*\}?$ ]] &&
+           [[ ! "$LINE" =~ ^[[:space:]]*$ ]]; then
+          
+          TOTAL_LINES=$((TOTAL_LINES + 1))
+          
+          # Determine AI type based on author
+          IS_AI=false
+          AI_TYPE=""
+          
+          # Check for Claude/Anthropic
+          if echo "$AUTHOR" | grep -iE 'claude|anthropic' >/dev/null || echo "$AUTHOR_EMAIL" | grep -iE 'claude|anthropic' >/dev/null; then
+            AI_TYPE="Claude"
+            CLAUDE_LINES=$((CLAUDE_LINES + 1))
+            IS_AI=true
+          # Check for Cursor
+          elif echo "$AUTHOR" | grep -i 'cursor' >/dev/null; then
+            AI_TYPE="Cursor"
+            CURSOR_LINES=$((CURSOR_LINES + 1))
+            IS_AI=true
+          # Check for Windsurf
+          elif echo "$AUTHOR" | grep -i 'windsurf' >/dev/null; then
+            AI_TYPE="Windsurf"
+            WINDSURF_LINES=$((WINDSURF_LINES + 1))
+            IS_AI=true
+          # Check for Zed
+          elif echo "$AUTHOR" | grep -i 'zed' >/dev/null; then
+            AI_TYPE="Zed"
+            ZED_LINES=$((ZED_LINES + 1))
+            IS_AI=true
+          # Check for OpenAI
+          elif echo "$AUTHOR" | grep -i 'openai' >/dev/null; then
+            AI_TYPE="OpenAI"
+            OPENAI_LINES=$((OPENAI_LINES + 1))
+            IS_AI=true
+          # Check for bots
+          elif echo "$AUTHOR" | grep -i '\[bot\]' >/dev/null || echo "$AUTHOR" | grep -iE 'renovate|semantic-release'; then
+            if echo "$AUTHOR" | grep -i 'renovate' >/dev/null; then
+              AI_TYPE="Renovate"
+              RENOVATE_LINES=$((RENOVATE_LINES + 1))
+            elif echo "$AUTHOR" | grep -iE 'semantic-release|semantic' >/dev/null; then
+              AI_TYPE="Semantic"
+              SEMANTIC_LINES=$((SEMANTIC_LINES + 1))
+            else
+              AI_TYPE="Bot"
+              BOT_LINES=$((BOT_LINES + 1))
+            fi
+            IS_AI=true
+          fi
+          
+          if $IS_AI; then
+            AI_LINES=$((AI_LINES + 1))
+          fi
+        fi
+      fi
+    done < "$FILE"
   fi
 done
 
-if [ "$TOTAL" -eq 0 ]; then
+# Calculate percentage
+if [ "$TOTAL_LINES" -eq 0 ]; then
   PERCENT=0
 else
-  PERCENT=$((100 * VIBE / TOTAL))
+  PERCENT=$((100 * AI_LINES / TOTAL_LINES))
 fi
 
-# Determine which logo to use based on most common AI type
+# Determine which logo to use based on most lines by AI type
 LOGO="githubcopilot"  # default
 MAX_COUNT=0
 DOMINANT_AI="unknown"
 
-# Check each AI type
-if [ "$CLAUDE_COUNT" -gt "$MAX_COUNT" ]; then
-  MAX_COUNT="$CLAUDE_COUNT"
+# Check each AI type based on line counts
+if [ "$CLAUDE_LINES" -gt "$MAX_COUNT" ]; then
+  MAX_COUNT="$CLAUDE_LINES"
   LOGO="claude"
   DOMINANT_AI="Claude"
 fi
-if [ "$CODEX_COUNT" -gt "$MAX_COUNT" ]; then
-  MAX_COUNT="$CODEX_COUNT"
-  LOGO="openai"
-  DOMINANT_AI="Codex"
-fi
-if [ "$WINDSURF_COUNT" -gt "$MAX_COUNT" ]; then
-  MAX_COUNT="$WINDSURF_COUNT"
-  LOGO="windsurf"
-  DOMINANT_AI="Windsurf"
-fi
-if [ "$CURSOR_COUNT" -gt "$MAX_COUNT" ]; then
-  MAX_COUNT="$CURSOR_COUNT"
+if [ "$CURSOR_LINES" -gt "$MAX_COUNT" ]; then
+  MAX_COUNT="$CURSOR_LINES"
   LOGO="githubcopilot"
   DOMINANT_AI="Cursor"
 fi
-if [ "$ZED_COUNT" -gt "$MAX_COUNT" ]; then
-  MAX_COUNT="$ZED_COUNT"
+if [ "$WINDSURF_LINES" -gt "$MAX_COUNT" ]; then
+  MAX_COUNT="$WINDSURF_LINES"
+  LOGO="windsurf"
+  DOMINANT_AI="Windsurf"
+fi
+if [ "$ZED_LINES" -gt "$MAX_COUNT" ]; then
+  MAX_COUNT="$ZED_LINES"
   LOGO="zedindustries"
   DOMINANT_AI="Zed"
 fi
-if [ "$OPENAI_COUNT" -gt "$MAX_COUNT" ]; then
-  MAX_COUNT="$OPENAI_COUNT"
+if [ "$OPENAI_LINES" -gt "$MAX_COUNT" ]; then
+  MAX_COUNT="$OPENAI_LINES"
   LOGO="openai"
   DOMINANT_AI="OpenAI"
 fi
-if [ "$BOT_COUNT" -gt "$MAX_COUNT" ]; then
-  MAX_COUNT="$BOT_COUNT"
+if [ "$BOT_LINES" -gt "$MAX_COUNT" ]; then
+  MAX_COUNT="$BOT_LINES"
   LOGO="githubactions"
   DOMINANT_AI="Bot"
 fi
-if [ "$RENOVATE_COUNT" -gt "$MAX_COUNT" ]; then
-  MAX_COUNT="$RENOVATE_COUNT"
+if [ "$RENOVATE_LINES" -gt "$MAX_COUNT" ]; then
+  MAX_COUNT="$RENOVATE_LINES"
   LOGO="renovatebot"
   DOMINANT_AI="Renovate"
 fi
-if [ "$SEMANTIC_COUNT" -gt "$MAX_COUNT" ]; then
-  MAX_COUNT="$SEMANTIC_COUNT"
+if [ "$SEMANTIC_LINES" -gt "$MAX_COUNT" ]; then
+  MAX_COUNT="$SEMANTIC_LINES"
   LOGO="semanticrelease"
   DOMINANT_AI="Semantic"
 fi
 
 # Display debug output
 if $DEBUG; then
-  echo "=== Vibe Badge Debug Mode ==="
-  echo "Total commits: $TOTAL"
+  echo "=== Vibe Badge Debug Mode (Line-based) ==="
+  echo "Total lines of code: $TOTAL_LINES"
   echo ""
-  echo "AI-generated commits: $VIBE (${PERCENT}%)"
-  echo "Human commits: $((TOTAL - VIBE)) ($((100 - PERCENT))%)"
+  echo "AI-generated lines: $AI_LINES (${PERCENT}%)"
+  echo "Human-written lines: $((TOTAL_LINES - AI_LINES)) ($((100 - PERCENT))%)"
   echo ""
-  echo "AI Breakdown:"
-  [ "$CLAUDE_COUNT" -gt 0 ] && printf "  %-10s: %d\n" "Claude" "$CLAUDE_COUNT"
-  [ "$CODEX_COUNT" -gt 0 ] && printf "  %-10s: %d\n" "Codex" "$CODEX_COUNT"
-  [ "$WINDSURF_COUNT" -gt 0 ] && printf "  %-10s: %d\n" "Windsurf" "$WINDSURF_COUNT"
-  [ "$CURSOR_COUNT" -gt 0 ] && printf "  %-10s: %d\n" "Cursor" "$CURSOR_COUNT"
-  [ "$ZED_COUNT" -gt 0 ] && printf "  %-10s: %d\n" "Zed" "$ZED_COUNT"
-  [ "$OPENAI_COUNT" -gt 0 ] && printf "  %-10s: %d\n" "OpenAI" "$OPENAI_COUNT"
-  [ "$BOT_COUNT" -gt 0 ] && printf "  %-10s: %d\n" "Bot" "$BOT_COUNT"
-  [ "$RENOVATE_COUNT" -gt 0 ] && printf "  %-10s: %d\n" "Renovate" "$RENOVATE_COUNT"
-  [ "$SEMANTIC_COUNT" -gt 0 ] && printf "  %-10s: %d\n" "Semantic" "$SEMANTIC_COUNT"
+  echo "AI Breakdown by lines:"
+  [ "$CLAUDE_LINES" -gt 0 ] && printf "  %-10s: %d lines\n" "Claude" "$CLAUDE_LINES"
+  [ "$CURSOR_LINES" -gt 0 ] && printf "  %-10s: %d lines\n" "Cursor" "$CURSOR_LINES"
+  [ "$WINDSURF_LINES" -gt 0 ] && printf "  %-10s: %d lines\n" "Windsurf" "$WINDSURF_LINES"
+  [ "$ZED_LINES" -gt 0 ] && printf "  %-10s: %d lines\n" "Zed" "$ZED_LINES"
+  [ "$OPENAI_LINES" -gt 0 ] && printf "  %-10s: %d lines\n" "OpenAI" "$OPENAI_LINES"
+  [ "$BOT_LINES" -gt 0 ] && printf "  %-10s: %d lines\n" "Bot" "$BOT_LINES"
+  [ "$RENOVATE_LINES" -gt 0 ] && printf "  %-10s: %d lines\n" "Renovate" "$RENOVATE_LINES"
+  [ "$SEMANTIC_LINES" -gt 0 ] && printf "  %-10s: %d lines\n" "Semantic" "$SEMANTIC_LINES"
   echo ""
   echo "Selected logo: $LOGO (Dominant AI: $DOMINANT_AI)"
-  echo ""
-  echo "AI Commits:"
-  echo "-----------"
-  echo "SHA     | Type       | Subject                                  | Date"
-  echo "--------|------------|------------------------------------------|----------"
-  if [ ${#AI_COMMITS[@]} -gt 0 ]; then
-    printf "%s\n" "${AI_COMMITS[@]}" | sort -k4 -r
-  else
-    echo "None"
-  fi
-  echo ""
-  echo "Human Commits:"
-  echo "--------------"
-  echo "SHA     | Subject                                  | Date"
-  echo "--------|------------------------------------------|----------"
-  if [ ${#HUMAN_COMMITS[@]} -gt 0 ]; then
-    printf "%s\n" "${HUMAN_COMMITS[@]}" | sort -k3 -r
-  else
-    echo "None"
-  fi
   echo ""
 fi
 
