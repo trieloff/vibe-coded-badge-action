@@ -230,7 +230,7 @@ if ! $DEBUG; then
     GITHUB_URL="https://github.com"
   fi
 
-  NEW_BADGE="[![${PERCENT}% ${BADGE_TEXT}](https://img.shields.io/badge/${PERCENT}%25-${BADGE_TEXT}-${BADGE_COLOR}?style=${BADGE_STYLE}&logo=${LOGO}&logoColor=white)](${GITHUB_URL})"
+  NEW_BADGE="[![${PERCENT}% ${BADGE_TEXT}](https://img.shields.io/badge/${PERCENT}%25-${BADGE_TEXT}-${BADGE_COLOR}?style=${BADGE_STYLE}&logo=${LOGO}&logoColor=white)](https://github.com/trieloff/vibe-coded-badge-action)"
   
   # Export badge for perl to use
   export NEW_BADGE
