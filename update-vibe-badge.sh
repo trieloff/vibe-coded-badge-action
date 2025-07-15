@@ -249,14 +249,19 @@ if ! $DEBUG; then
   fi
 
   if $BADGE_CHANGED; then
-    git config user.name 'github-actions[bot]'
-    git config user.email 'github-actions[bot]@users.noreply.github.com'
-    git add "$README_PATH"
-    git commit -m "$COMMIT_MESSAGE to ${PERCENT}% [skip vibe-badge]"
-    
-    # Push the changes if we're in GitHub Actions
-    if [ -n "${GITHUB_ACTIONS:-}" ]; then
-      git push origin HEAD
+    # Check if there are actually changes to commit
+    if ! git diff --quiet "$README_PATH" || ! git diff --cached --quiet "$README_PATH"; then
+      git config user.name 'github-actions[bot]'
+      git config user.email 'github-actions[bot]@users.noreply.github.com'
+      git add "$README_PATH"
+      git commit -m "$COMMIT_MESSAGE to ${PERCENT}% [skip vibe-badge]"
+      
+      # Push the changes if we're in GitHub Actions
+      if [ -n "${GITHUB_ACTIONS:-}" ]; then
+        git push origin HEAD
+      fi
+    else
+      BADGE_CHANGED=false
     fi
   fi
 fi
