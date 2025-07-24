@@ -24,6 +24,7 @@ CURSOR_LINES=0
 WINDSURF_LINES=0
 ZED_LINES=0
 OPENAI_LINES=0
+TERRAGON_LINES=0
 BOT_LINES=0
 RENOVATE_LINES=0
 SEMANTIC_LINES=0
@@ -49,11 +50,16 @@ SOURCE_FILES=$(find . -type f \
 for FILE in $SOURCE_FILES; do
   if [ -f "$FILE" ] && [ -r "$FILE" ]; then
     # Use git blame to analyze each line
+    # Get line number counter
+    LINE_NUM=0
     while IFS= read -r LINE; do
+      LINE_NUM=$((LINE_NUM + 1))
       if [[ -n "$LINE" ]]; then
-        # Extract author from git blame
-        AUTHOR=$(git blame --line-porcelain "$FILE" | grep -A1 "^author " | tail -n1 | cut -d' ' -f2-)
-        AUTHOR_EMAIL=$(git blame --line-porcelain "$FILE" | grep -A1 "^author-mail " | tail -n1 | cut -d' ' -f2- | tr -d '<>')
+        # Extract author and commit info from git blame for this specific line
+        BLAME_INFO=$(git blame --line-porcelain -L ${LINE_NUM},${LINE_NUM} "$FILE" 2>/dev/null)
+        AUTHOR=$(echo "$BLAME_INFO" | grep "^author " | cut -d' ' -f2-)
+        AUTHOR_EMAIL=$(echo "$BLAME_INFO" | grep "^author-mail " | cut -d' ' -f2- | tr -d '<>')
+        COMMIT_HASH=$(echo "$BLAME_INFO" | head -n1 | cut -d' ' -f1)
         
         # Skip empty lines and obvious boilerplate
         if [[ -n "$(echo "$LINE" | tr -d '[:space:]')" ]] && 
@@ -72,8 +78,13 @@ for FILE in $SOURCE_FILES; do
           IS_AI=false
           AI_TYPE=""
           
+          # Check for Terragon (via Co-authored-by in commit message)
+          if git show --format=%B "$COMMIT_HASH" 2>/dev/null | grep -iE 'Co-authored-by:.*terragon' >/dev/null; then
+            AI_TYPE="Terragon"
+            TERRAGON_LINES=$((TERRAGON_LINES + 1))
+            IS_AI=true
           # Check for Claude/Anthropic
-          if echo "$AUTHOR" | grep -iE 'claude|anthropic' >/dev/null || echo "$AUTHOR_EMAIL" | grep -iE 'claude|anthropic' >/dev/null; then
+          elif echo "$AUTHOR" | grep -iE 'claude|anthropic' >/dev/null || echo "$AUTHOR_EMAIL" | grep -iE 'claude|anthropic' >/dev/null; then
             AI_TYPE="Claude"
             CLAUDE_LINES=$((CLAUDE_LINES + 1))
             IS_AI=true
@@ -139,6 +150,11 @@ if [ "$CLAUDE_LINES" -gt "$MAX_COUNT" ]; then
   LOGO="claude"
   DOMINANT_AI="Claude"
 fi
+if [ "$TERRAGON_LINES" -gt "$MAX_COUNT" ]; then
+  MAX_COUNT="$TERRAGON_LINES"
+  LOGO="claude"
+  DOMINANT_AI="Terragon"
+fi
 if [ "$CURSOR_LINES" -gt "$MAX_COUNT" ]; then
   MAX_COUNT="$CURSOR_LINES"
   LOGO="githubcopilot"
@@ -185,6 +201,7 @@ if $DEBUG; then
   echo ""
   echo "AI Breakdown by lines:"
   [ "$CLAUDE_LINES" -gt 0 ] && printf "  %-10s: %d lines\n" "Claude" "$CLAUDE_LINES"
+  [ "$TERRAGON_LINES" -gt 0 ] && printf "  %-10s: %d lines\n" "Terragon" "$TERRAGON_LINES"
   [ "$CURSOR_LINES" -gt 0 ] && printf "  %-10s: %d lines\n" "Cursor" "$CURSOR_LINES"
   [ "$WINDSURF_LINES" -gt 0 ] && printf "  %-10s: %d lines\n" "Windsurf" "$WINDSURF_LINES"
   [ "$ZED_LINES" -gt 0 ] && printf "  %-10s: %d lines\n" "Zed" "$ZED_LINES"
