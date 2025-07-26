@@ -8,6 +8,7 @@ BADGE_COLOR="${BADGE_COLOR:-ff69b4}"
 BADGE_TEXT="${BADGE_TEXT:-Vibe_Coded}"
 COMMIT_MESSAGE="${COMMIT_MESSAGE:-Update vibe-coded badge}"
 DEBUG="${DEBUG:-false}"
+SKIP_ON_ERROR="${SKIP_ON_ERROR:-true}"
 
 # Parse debug flag from environment or command line
 if [[ "${1:-}" == "--debug" || "${1:-}" == "-d" || "$DEBUG" == "true" ]]; then
@@ -275,7 +276,15 @@ if ! $DEBUG; then
       
       # Push the changes if we're in GitHub Actions
       if [ -n "${GITHUB_ACTIONS:-}" ]; then
-        git push origin HEAD
+        if [ "$SKIP_ON_ERROR" = "true" ]; then
+          if ! git push origin HEAD 2>/dev/null; then
+            echo "Warning: Failed to push changes to remote. This is usually caused by concurrent updates."
+            echo "The badge has been updated locally but not pushed to the remote repository."
+            echo "Set SKIP_ON_ERROR=false to fail on push errors instead of skipping."
+          fi
+        else
+          git push origin HEAD
+        fi
       fi
     else
       BADGE_CHANGED=false
