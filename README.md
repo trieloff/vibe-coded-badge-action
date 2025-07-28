@@ -4,6 +4,9 @@
 
 A GitHub Action that automatically analyzes your repository's git history to determine what percentage of commits were made by AI tools, and updates a badge in your README accordingly.
 
+![a_futuristic_glow_image](https://github.com/user-attachments/assets/0350cfe6-7631-4613-aa3e-74e2bd53eda4)
+
+
 ## Features
 
 - **Smart AI Detection**: Identifies commits from Claude, Cursor, Zed, Windsurf, OpenAI, Codex, and various bots
