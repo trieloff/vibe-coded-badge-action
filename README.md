@@ -6,6 +6,15 @@ A GitHub Action that automatically analyzes your repository's git history to det
 
 ![a_futuristic_glow_image](https://github.com/user-attachments/assets/0350cfe6-7631-4613-aa3e-74e2bd53eda4)
 
+## The Vibe Coding Ecosystem
+
+This project is part of a suite of tools designed for the emerging world of **vibe coding** - a new AI-assisted software development paradigm where developers guide AI tools through natural language to build software, embracing the collaborative potential of human-AI partnership.
+
+### Related Projects
+
+- **[ai-aligned-git](https://github.com/trieloff/ai-aligned-git)** - A humorous Git wrapper that ensures AI coding agents maintain clean, attributed commits and follow best practices
+- **[gh-workflow-peek](https://github.com/trieloff/gh-workflow-peek)** - A GitHub CLI extension for intelligently filtering workflow errors, perfect for AI agents working with limited context windows
+
 ## Features
 
 - **Smart AI Detection**: Identifies commits from Claude, Cursor, Zed, Windsurf, OpenAI, Codex, and various bots
