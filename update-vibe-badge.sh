@@ -62,6 +62,15 @@ for FILE in $SOURCE_FILES; do
         AUTHOR_EMAIL=$(echo "$BLAME_INFO" | grep "^author-mail " | cut -d' ' -f2- | tr -d '<>')
         COMMIT_HASH=$(echo "$BLAME_INFO" | head -n1 | cut -d' ' -f1)
         
+        # Skip merge commits (commits with more than one parent)
+        if [ -n "$COMMIT_HASH" ] && [ "$COMMIT_HASH" != "0000000000000000000000000000000000000000" ]; then
+          PARENT_COUNT=$(git rev-list --parents -n 1 "$COMMIT_HASH" 2>/dev/null | wc -w)
+          # If parent count > 2 (commit hash + 2 or more parents), it's a merge commit
+          if [ "$PARENT_COUNT" -gt 2 ]; then
+            continue
+          fi
+        fi
+        
         # Skip empty lines and obvious boilerplate
         if [[ -n "$(echo "$LINE" | tr -d '[:space:]')" ]] && 
            [[ ! "$LINE" =~ ^[[:space:]]*# ]] && 
