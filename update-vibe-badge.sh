@@ -53,9 +53,7 @@ SOURCE_FILES=$(find . -type f \
 for FILE in $SOURCE_FILES; do
   if [ -f "$FILE" ] && [ -r "$FILE" ]; then
     # Use git blame to analyze each line
-    echo "DEBUG: Starting to process $FILE" >&2
     git blame --line-porcelain "$FILE" | while IFS= read -r LINE; do
-      echo "DEBUG: Read line: '$LINE'" >&2
       if [[ "$LINE" == author* ]]; then
         AUTHOR=$(echo "$LINE" | cut -d' ' -f2-)
       elif [[ "$LINE" == author-mail* ]]; then
@@ -78,22 +76,7 @@ for FILE in $SOURCE_FILES; do
             continue
           fi
         fi
-      elif [[ "$LINE" == previous* ]]; then
-        # This marks the end of a blame block for a line
-        # Skip merge commits (commits with more than one parent)
-        if [ -n "$COMMIT_HASH" ] && [ "$COMMIT_HASH" != "0000000000000000000000000000000000000000" ]; then
-          PARENT_COUNT=$(git rev-list --parents -n 1 "$COMMIT_HASH" 2>/dev/null | wc -w)
-          # If parent count > 2 (commit hash + 2 or more parents), it's a merge commit
-          if [ "$PARENT_COUNT" -gt 2 ]; then
-            continue
-          fi
-        fi
 
-        # Debug output
-        echo "DEBUG: Processing line: '$LINE'" >&2
-        echo "DEBUG: AUTHOR='$AUTHOR', AUTHOR_EMAIL='$AUTHOR_EMAIL'" >&2
-        echo "DEBUG: COMMIT_HASH='$COMMIT_HASH'" >&2
-        
         # Skip empty lines and obvious boilerplate
         if [[ -n "$(echo "$LINE" | tr -d '[:space:]')" ]] &&
            [[ ! "$LINE" =~ ^[[:space:]]*# ]] &&
@@ -106,7 +89,6 @@ for FILE in $SOURCE_FILES; do
            [[ ! "$LINE" =~ ^[[:space:]]*$ ]]; then
 
           TOTAL_LINES=$((TOTAL_LINES + 1))
-          echo "DEBUG: Line counted" >&2
 
           # Determine AI type based on author
           IS_AI=false
@@ -351,5 +333,3 @@ fi
 if [ -n "${GITHUB_OUTPUT:-}" ]; then
   echo "changed=$BADGE_CHANGED" >> "$GITHUB_OUTPUT"
 fi
-QWEN_TEST_LINE='test'
-TEST_VARIABLE=123
