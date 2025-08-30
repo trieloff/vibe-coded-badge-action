@@ -207,3 +207,4 @@ MIT License - see LICENSE file for details.
 ## Contributing
 
 Pull requests welcome! Please ensure your commits follow the existing patterns for proper AI detection.
+# Test line for Qwen Code detection
