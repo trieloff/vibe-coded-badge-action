@@ -100,8 +100,8 @@ for FILE in $SOURCE_FILES; do
         elif echo "$AUTHOR" | grep -i 'zed' >/dev/null; then
           ZED_LINES=$((ZED_LINES + 1))
           IS_AI=true
-        # Check for OpenAI
-        elif echo "$AUTHOR" | grep -i 'openai' >/dev/null; then
+        # Check for OpenAI/OpenCode
+        elif echo "$AUTHOR" | grep -iE 'openai|opencode' >/dev/null; then
           OPENAI_LINES=$((OPENAI_LINES + 1))
           IS_AI=true
         # Check for Qwen Code
