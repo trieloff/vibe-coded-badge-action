@@ -26,6 +26,7 @@ WINDSURF_LINES=0
 ZED_LINES=0
 OPENAI_LINES=0
 TERRAGON_LINES=0
+GEMINI_LINES=0
 BOT_LINES=0
 RENOVATE_LINES=0
 SEMANTIC_LINES=0
@@ -121,6 +122,11 @@ for FILE in $SOURCE_FILES; do
             AI_TYPE="OpenAI"
             OPENAI_LINES=$((OPENAI_LINES + 1))
             IS_AI=true
+          # Check for Gemini
+          elif echo "$AUTHOR" | grep -i 'gemini' >/dev/null || echo "$AUTHOR_EMAIL" | grep -E 'noreply@google\.com' >/dev/null; then
+            AI_TYPE="Gemini"
+            GEMINI_LINES=$((GEMINI_LINES + 1))
+            IS_AI=true
           # Check for bots
           elif echo "$AUTHOR" | grep -i '\[bot\]' >/dev/null || echo "$AUTHOR" | grep -iE 'renovate|semantic-release'; then
             if echo "$AUTHOR" | grep -i 'renovate' >/dev/null; then
@@ -188,6 +194,11 @@ if [ "$OPENAI_LINES" -gt "$MAX_COUNT" ]; then
   LOGO="openai"
   DOMINANT_AI="OpenAI"
 fi
+if [ "$GEMINI_LINES" -gt "$MAX_COUNT" ]; then
+  MAX_COUNT="$GEMINI_LINES"
+  LOGO="google"
+  DOMINANT_AI="Gemini"
+fi
 if [ "$BOT_LINES" -gt "$MAX_COUNT" ]; then
   MAX_COUNT="$BOT_LINES"
   LOGO="githubactions"
@@ -219,6 +230,7 @@ if $DEBUG; then
   [ "$WINDSURF_LINES" -gt 0 ] && printf "  %-10s: %d lines\n" "Windsurf" "$WINDSURF_LINES"
   [ "$ZED_LINES" -gt 0 ] && printf "  %-10s: %d lines\n" "Zed" "$ZED_LINES"
   [ "$OPENAI_LINES" -gt 0 ] && printf "  %-10s: %d lines\n" "OpenAI" "$OPENAI_LINES"
+  [ "$GEMINI_LINES" -gt 0 ] && printf "  %-10s: %d lines\n" "Gemini" "$GEMINI_LINES"
   [ "$BOT_LINES" -gt 0 ] && printf "  %-10s: %d lines\n" "Bot" "$BOT_LINES"
   [ "$RENOVATE_LINES" -gt 0 ] && printf "  %-10s: %d lines\n" "Renovate" "$RENOVATE_LINES"
   [ "$SEMANTIC_LINES" -gt 0 ] && printf "  %-10s: %d lines\n" "Semantic" "$SEMANTIC_LINES"
