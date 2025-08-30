@@ -27,6 +27,7 @@ ZED_LINES=0
 OPENAI_LINES=0
 TERRAGON_LINES=0
 GEMINI_LINES=0
+QWEN_LINES=0
 BOT_LINES=0
 RENOVATE_LINES=0
 SEMANTIC_LINES=0
@@ -62,7 +63,8 @@ for FILE in $SOURCE_FILES; do
       elif [[ "$LINE" == summary* ]]; then
         # This is the content of the line, but we don't need it
         :
-      elif [[ "$LINE" == commit* ]]; then
+      elif [[ "$LINE" =~ ^[a-f0-9]{40} ]]; then
+        # This is a commit hash line
         COMMIT_HASH=$(echo "$LINE" | cut -d' ' -f1)
       elif [[ "$LINE" == previous* ]]; then
         # This marks the end of a blame block for a line
@@ -121,6 +123,11 @@ for FILE in $SOURCE_FILES; do
           elif echo "$AUTHOR" | grep -i 'openai' >/dev/null; then
             AI_TYPE="OpenAI"
             OPENAI_LINES=$((OPENAI_LINES + 1))
+            IS_AI=true
+          # Check for Qwen Code
+          elif echo "$AUTHOR" | grep -i 'qwen code' >/dev/null || echo "$AUTHOR_EMAIL" | grep -E 'noreply@alibaba\.com' >/dev/null; then
+            AI_TYPE="Qwen"
+            QWEN_LINES=$((QWEN_LINES + 1))
             IS_AI=true
           # Check for Gemini
           elif echo "$AUTHOR" | grep -i 'gemini' >/dev/null || echo "$AUTHOR_EMAIL" | grep -E 'noreply@google\.com' >/dev/null; then
@@ -199,6 +206,11 @@ if [ "$GEMINI_LINES" -gt "$MAX_COUNT" ]; then
   LOGO="google"
   DOMINANT_AI="Gemini"
 fi
+if [ "$QWEN_LINES" -gt "$MAX_COUNT" ]; then
+  MAX_COUNT="$QWEN_LINES"
+  LOGO="alibabacloud"
+  DOMINANT_AI="Qwen"
+fi
 if [ "$BOT_LINES" -gt "$MAX_COUNT" ]; then
   MAX_COUNT="$BOT_LINES"
   LOGO="githubactions"
@@ -231,6 +243,7 @@ if $DEBUG; then
   [ "$ZED_LINES" -gt 0 ] && printf "  %-10s: %d lines\n" "Zed" "$ZED_LINES"
   [ "$OPENAI_LINES" -gt 0 ] && printf "  %-10s: %d lines\n" "OpenAI" "$OPENAI_LINES"
   [ "$GEMINI_LINES" -gt 0 ] && printf "  %-10s: %d lines\n" "Gemini" "$GEMINI_LINES"
+  [ "$QWEN_LINES" -gt 0 ] && printf "  %-10s: %d lines\n" "Qwen" "$QWEN_LINES"
   [ "$BOT_LINES" -gt 0 ] && printf "  %-10s: %d lines\n" "Bot" "$BOT_LINES"
   [ "$RENOVATE_LINES" -gt 0 ] && printf "  %-10s: %d lines\n" "Renovate" "$RENOVATE_LINES"
   [ "$SEMANTIC_LINES" -gt 0 ] && printf "  %-10s: %d lines\n" "Semantic" "$SEMANTIC_LINES"
