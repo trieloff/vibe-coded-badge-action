@@ -25,6 +25,7 @@ CURSOR_LINES=0
 WINDSURF_LINES=0
 ZED_LINES=0
 OPENAI_LINES=0
+OPENCODE_LINES=0
 TERRAGON_LINES=0
 GEMINI_LINES=0
 QWEN_LINES=0
@@ -49,112 +50,90 @@ SOURCE_FILES=$(find . -type f \
   -not -path "./vendor/*" \
   -not -name "*.min.js" -not -name "*.min.css" 2>/dev/null)
 
-# Process each source file
+# Process each source file  
 for FILE in $SOURCE_FILES; do
   if [ -f "$FILE" ] && [ -r "$FILE" ]; then
-    # Use git blame to analyze each line
-    git blame --line-porcelain "$FILE" | while IFS= read -r LINE; do
-      if [[ "$LINE" == author* ]]; then
-        AUTHOR=$(echo "$LINE" | cut -d' ' -f2-)
-      elif [[ "$LINE" == author-mail* ]]; then
-        AUTHOR_EMAIL=$(echo "$LINE" | cut -d' ' -f2- | tr -d '<>')
-      elif [[ "$LINE" == filename* ]]; then
-        FILENAME=$(echo "$LINE" | cut -d' ' -f2-)
-      elif [[ "$LINE" == summary* ]]; then
-        # This is the content of the line, but we don't need it
-        :
-      elif [[ "$LINE" =~ ^[a-f0-9]{40} ]]; then
-        # This is a commit hash line
-        COMMIT_HASH=$(echo "$LINE" | cut -d' ' -f1)
-      elif [[ "$LINE" == previous* ]]; then
-        # This marks the end of a blame block for a line
-        # Skip merge commits (commits with more than one parent)
-        if [ -n "$COMMIT_HASH" ] && [ "$COMMIT_HASH" != "0000000000000000000000000000000000000000" ]; then
-          PARENT_COUNT=$(git rev-list --parents -n 1 "$COMMIT_HASH" 2>/dev/null | wc -w)
-          # If parent count > 2 (commit hash + 2 or more parents), it's a merge commit
-          if [ "$PARENT_COUNT" -gt 2 ]; then
-            continue
-          fi
+    # Process git blame output line by line
+    # Using process substitution to avoid subshell issues
+    while IFS= read -r LINE; do
+      # Parse the blame metadata
+      if [[ "$LINE" =~ ^([a-f0-9]{40})[[:space:]] ]]; then
+        COMMIT_HASH="${BASH_REMATCH[1]}"
+        
+        # Skip if it's the null commit (uncommitted changes)
+        if [ "$COMMIT_HASH" = "0000000000000000000000000000000000000000" ]; then
+          continue
         fi
-
-        # Skip empty lines and obvious boilerplate
-        if [[ -n "$(echo "$LINE" | tr -d '[:space:]')" ]] &&
-           [[ ! "$LINE" =~ ^[[:space:]]*# ]] &&
-           [[ ! "$LINE" =~ ^[[:space:]]*// ]] &&
-           [[ ! "$LINE" =~ ^[[:space:]]*\* ]] &&
-           [[ ! "$LINE" =~ ^[[:space:]]*\*/ ]] &&
-           [[ ! "$LINE" =~ ^[[:space:]]*import\  ]] &&
-           [[ ! "$LINE" =~ ^[[:space:]]*package\  ]] &&
-           [[ ! "$LINE" =~ ^[[:space:]]*\{?[[:space:]]*\}?$ ]] &&
-           [[ ! "$LINE" =~ ^[[:space:]]*$ ]]; then
-
-          TOTAL_LINES=$((TOTAL_LINES + 1))
-
-          # Determine AI type based on author
-          IS_AI=false
-          AI_TYPE=""
-
-          # Check for Terragon (via Co-authored-by in commit message)
-          if git show --format=%B "$COMMIT_HASH" 2>/dev/null | grep -iE 'Co-authored-by:.*terragon' >/dev/null; then
-            AI_TYPE="Terragon"
-            TERRAGON_LINES=$((TERRAGON_LINES + 1))
-            IS_AI=true
-          # Check for Claude/Anthropic
-          elif echo "$AUTHOR" | grep -iE 'claude|anthropic' >/dev/null || echo "$AUTHOR_EMAIL" | grep -iE 'claude|anthropic' >/dev/null; then
-            AI_TYPE="Claude"
-            CLAUDE_LINES=$((CLAUDE_LINES + 1))
-            IS_AI=true
-          # Check for Cursor
-          elif echo "$AUTHOR" | grep -i 'cursor' >/dev/null; then
-            AI_TYPE="Cursor"
-            CURSOR_LINES=$((CURSOR_LINES + 1))
-            IS_AI=true
-          # Check for Windsurf
-          elif echo "$AUTHOR" | grep -i 'windsurf' >/dev/null; then
-            AI_TYPE="Windsurf"
-            WINDSURF_LINES=$((WINDSURF_LINES + 1))
-            IS_AI=true
-          # Check for Zed
-          elif echo "$AUTHOR" | grep -i 'zed' >/dev/null; then
-            AI_TYPE="Zed"
-            ZED_LINES=$((ZED_LINES + 1))
-            IS_AI=true
-          # Check for OpenAI
-          elif echo "$AUTHOR" | grep -i 'openai' >/dev/null; then
-            AI_TYPE="OpenAI"
-            OPENAI_LINES=$((OPENAI_LINES + 1))
-            IS_AI=true
-          # Check for Qwen Code
-          elif echo "$AUTHOR" | grep -i 'qwen code' >/dev/null || echo "$AUTHOR_EMAIL" | grep -E 'noreply@alibaba\.com' >/dev/null; then
-            AI_TYPE="Qwen"
-            QWEN_LINES=$((QWEN_LINES + 1))
-            IS_AI=true
-          # Check for Gemini
-          elif echo "$AUTHOR" | grep -i 'gemini' >/dev/null || echo "$AUTHOR_EMAIL" | grep -E 'noreply@google\.com' >/dev/null; then
-            AI_TYPE="Gemini"
-            GEMINI_LINES=$((GEMINI_LINES + 1))
-            IS_AI=true
-          # Check for bots
-          elif echo "$AUTHOR" | grep -i '\[bot\]' >/dev/null || echo "$AUTHOR" | grep -iE 'renovate|semantic-release'; then
-            if echo "$AUTHOR" | grep -i 'renovate' >/dev/null; then
-              AI_TYPE="Renovate"
-              RENOVATE_LINES=$((RENOVATE_LINES + 1))
-            elif echo "$AUTHOR" | grep -iE 'semantic-release|semantic' >/dev/null; then
-              AI_TYPE="Semantic"
-              SEMANTIC_LINES=$((SEMANTIC_LINES + 1))
-            else
-              AI_TYPE="Bot"
-              BOT_LINES=$((BOT_LINES + 1))
-            fi
-            IS_AI=true
+        
+        # Skip merge commits
+        PARENT_COUNT=$(git rev-list --parents -n 1 "$COMMIT_HASH" 2>/dev/null | wc -w)
+        if [ "$PARENT_COUNT" -gt 2 ]; then
+          continue
+        fi
+        
+        # Get author info for this commit
+        AUTHOR=$(git show -s --format='%an' "$COMMIT_HASH" 2>/dev/null || echo "")
+        AUTHOR_EMAIL=$(git show -s --format='%ae' "$COMMIT_HASH" 2>/dev/null || echo "")
+        
+        # Count the line
+        TOTAL_LINES=$((TOTAL_LINES + 1))
+        
+        # Determine if it's AI-authored
+        IS_AI=false
+        
+        # Check for Terragon (via Co-authored-by in commit message)
+        if git show --format=%B "$COMMIT_HASH" 2>/dev/null | grep -iE 'Co-authored-by:.*terragon' >/dev/null; then
+          TERRAGON_LINES=$((TERRAGON_LINES + 1))
+          IS_AI=true
+        # Check for Claude/Anthropic
+        elif echo "$AUTHOR" | grep -iE 'claude|anthropic' >/dev/null || echo "$AUTHOR_EMAIL" | grep -iE 'claude|anthropic' >/dev/null; then
+          CLAUDE_LINES=$((CLAUDE_LINES + 1))
+          IS_AI=true
+        # Check for Cursor
+        elif echo "$AUTHOR" | grep -i 'cursor' >/dev/null; then
+          CURSOR_LINES=$((CURSOR_LINES + 1))
+          IS_AI=true
+        # Check for Windsurf
+        elif echo "$AUTHOR" | grep -i 'windsurf' >/dev/null; then
+          WINDSURF_LINES=$((WINDSURF_LINES + 1))
+          IS_AI=true
+        # Check for Zed
+        elif echo "$AUTHOR" | grep -i 'zed' >/dev/null; then
+          ZED_LINES=$((ZED_LINES + 1))
+          IS_AI=true
+        # Check for OpenAI
+        elif echo "$AUTHOR" | grep -i 'openai' >/dev/null; then
+          OPENAI_LINES=$((OPENAI_LINES + 1))
+          IS_AI=true
+        # Check for OpenCode
+        elif echo "$AUTHOR" | grep -i 'opencode' >/dev/null; then
+          OPENCODE_LINES=$((OPENCODE_LINES + 1))
+          IS_AI=true
+        # Check for Qwen Code
+        elif echo "$AUTHOR" | grep -i 'qwen code' >/dev/null || echo "$AUTHOR_EMAIL" | grep -E 'noreply@alibaba\.com' >/dev/null; then
+          QWEN_LINES=$((QWEN_LINES + 1))
+          IS_AI=true
+        # Check for Gemini
+        elif echo "$AUTHOR" | grep -i 'gemini' >/dev/null || echo "$AUTHOR_EMAIL" | grep -E 'noreply@google\.com' >/dev/null; then
+          GEMINI_LINES=$((GEMINI_LINES + 1))
+          IS_AI=true
+        # Check for bots
+        elif echo "$AUTHOR" | grep -i '\[bot\]' >/dev/null || echo "$AUTHOR" | grep -iE 'renovate|semantic-release' >/dev/null; then
+          if echo "$AUTHOR" | grep -i 'renovate' >/dev/null; then
+            RENOVATE_LINES=$((RENOVATE_LINES + 1))
+          elif echo "$AUTHOR" | grep -iE 'semantic-release|semantic' >/dev/null; then
+            SEMANTIC_LINES=$((SEMANTIC_LINES + 1))
+          else
+            BOT_LINES=$((BOT_LINES + 1))
           fi
-
-          if $IS_AI; then
-            AI_LINES=$((AI_LINES + 1))
-          fi
+          IS_AI=true
+        fi
+        
+        if $IS_AI; then
+          AI_LINES=$((AI_LINES + 1))
         fi
       fi
-    done
+    done < <(git blame --line-porcelain "$FILE" 2>/dev/null | grep '^[a-f0-9]\{40\}')
   fi
 done
 
@@ -201,6 +180,11 @@ if [ "$OPENAI_LINES" -gt "$MAX_COUNT" ]; then
   LOGO="openai"
   DOMINANT_AI="OpenAI"
 fi
+if [ "$OPENCODE_LINES" -gt "$MAX_COUNT" ]; then
+  MAX_COUNT="$OPENCODE_LINES"
+  LOGO="githubcopilot"
+  DOMINANT_AI="OpenCode"
+fi
 if [ "$GEMINI_LINES" -gt "$MAX_COUNT" ]; then
   MAX_COUNT="$GEMINI_LINES"
   LOGO="google"
@@ -242,6 +226,7 @@ if $DEBUG; then
   [ "$WINDSURF_LINES" -gt 0 ] && printf "  %-10s: %d lines\n" "Windsurf" "$WINDSURF_LINES"
   [ "$ZED_LINES" -gt 0 ] && printf "  %-10s: %d lines\n" "Zed" "$ZED_LINES"
   [ "$OPENAI_LINES" -gt 0 ] && printf "  %-10s: %d lines\n" "OpenAI" "$OPENAI_LINES"
+  [ "$OPENCODE_LINES" -gt 0 ] && printf "  %-10s: %d lines\n" "OpenCode" "$OPENCODE_LINES"
   [ "$GEMINI_LINES" -gt 0 ] && printf "  %-10s: %d lines\n" "Gemini" "$GEMINI_LINES"
   [ "$QWEN_LINES" -gt 0 ] && printf "  %-10s: %d lines\n" "Qwen" "$QWEN_LINES"
   [ "$BOT_LINES" -gt 0 ] && printf "  %-10s: %d lines\n" "Bot" "$BOT_LINES"
