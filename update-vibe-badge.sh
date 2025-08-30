@@ -62,8 +62,19 @@ for FILE in $SOURCE_FILES; do
       elif [[ "$LINE" == summary* ]]; then
         # This is the content of the line, but we don't need it
         :
-      elif [[ "$LINE" == commit* ]]; then
+      elif [[ "$LINE" =~ ^[a-f0-9]{40} ]]; then
+        # This is a commit hash line
         COMMIT_HASH=$(echo "$LINE" | cut -d' ' -f1)
+      elif [[ "$LINE" == previous* ]]; then
+        # This marks the end of a blame block for a line
+        # Skip merge commits (commits with more than one parent)
+        if [ -n "$COMMIT_HASH" ] && [ "$COMMIT_HASH" != "0000000000000000000000000000000000000000" ]; then
+          PARENT_COUNT=$(git rev-list --parents -n 1 "$COMMIT_HASH" 2>/dev/null | wc -w)
+          # If parent count > 2 (commit hash + 2 or more parents), it's a merge commit
+          if [ "$PARENT_COUNT" -gt 2 ]; then
+            continue
+          fi
+        fi
       elif [[ "$LINE" == previous* ]]; then
         # This marks the end of a blame block for a line
         # Skip merge commits (commits with more than one parent)
@@ -121,6 +132,11 @@ for FILE in $SOURCE_FILES; do
           elif echo "$AUTHOR" | grep -i 'openai' >/dev/null; then
             AI_TYPE="OpenAI"
             OPENAI_LINES=$((OPENAI_LINES + 1))
+            IS_AI=true
+          # Check for Qwen Code
+          elif echo "$AUTHOR" | grep -i 'qwen code' >/dev/null || echo "$AUTHOR_EMAIL" | grep -E 'noreply@alibaba\.com' >/dev/null; then
+            AI_TYPE="Qwen"
+            QWEN_LINES=$((QWEN_LINES + 1))
             IS_AI=true
           # Check for Gemini
           elif echo "$AUTHOR" | grep -i 'gemini' >/dev/null || echo "$AUTHOR_EMAIL" | grep -E 'noreply@google\.com' >/dev/null; then
@@ -320,3 +336,4 @@ fi
 if [ -n "${GITHUB_OUTPUT:-}" ]; then
   echo "changed=$BADGE_CHANGED" >> "$GITHUB_OUTPUT"
 fi
+QWEN_TEST_LINE='test'
