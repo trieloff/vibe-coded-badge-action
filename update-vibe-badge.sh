@@ -27,6 +27,7 @@ ZED_LINES=0
 OPENAI_LINES=0
 TERRAGON_LINES=0
 GEMINI_LINES=0
+QWEN_LINES=0
 BOT_LINES=0
 RENOVATE_LINES=0
 SEMANTIC_LINES=0
@@ -52,7 +53,9 @@ SOURCE_FILES=$(find . -type f \
 for FILE in $SOURCE_FILES; do
   if [ -f "$FILE" ] && [ -r "$FILE" ]; then
     # Use git blame to analyze each line
+    echo "DEBUG: Starting to process $FILE" >&2
     git blame --line-porcelain "$FILE" | while IFS= read -r LINE; do
+      echo "DEBUG: Read line: '$LINE'" >&2
       if [[ "$LINE" == author* ]]; then
         AUTHOR=$(echo "$LINE" | cut -d' ' -f2-)
       elif [[ "$LINE" == author-mail* ]]; then
@@ -86,6 +89,11 @@ for FILE in $SOURCE_FILES; do
           fi
         fi
 
+        # Debug output
+        echo "DEBUG: Processing line: '$LINE'" >&2
+        echo "DEBUG: AUTHOR='$AUTHOR', AUTHOR_EMAIL='$AUTHOR_EMAIL'" >&2
+        echo "DEBUG: COMMIT_HASH='$COMMIT_HASH'" >&2
+        
         # Skip empty lines and obvious boilerplate
         if [[ -n "$(echo "$LINE" | tr -d '[:space:]')" ]] &&
            [[ ! "$LINE" =~ ^[[:space:]]*# ]] &&
@@ -98,6 +106,7 @@ for FILE in $SOURCE_FILES; do
            [[ ! "$LINE" =~ ^[[:space:]]*$ ]]; then
 
           TOTAL_LINES=$((TOTAL_LINES + 1))
+          echo "DEBUG: Line counted" >&2
 
           # Determine AI type based on author
           IS_AI=false
@@ -215,6 +224,11 @@ if [ "$GEMINI_LINES" -gt "$MAX_COUNT" ]; then
   LOGO="google"
   DOMINANT_AI="Gemini"
 fi
+if [ "$QWEN_LINES" -gt "$MAX_COUNT" ]; then
+  MAX_COUNT="$QWEN_LINES"
+  LOGO="alibabacloud"
+  DOMINANT_AI="Qwen"
+fi
 if [ "$BOT_LINES" -gt "$MAX_COUNT" ]; then
   MAX_COUNT="$BOT_LINES"
   LOGO="githubactions"
@@ -247,6 +261,7 @@ if $DEBUG; then
   [ "$ZED_LINES" -gt 0 ] && printf "  %-10s: %d lines\n" "Zed" "$ZED_LINES"
   [ "$OPENAI_LINES" -gt 0 ] && printf "  %-10s: %d lines\n" "OpenAI" "$OPENAI_LINES"
   [ "$GEMINI_LINES" -gt 0 ] && printf "  %-10s: %d lines\n" "Gemini" "$GEMINI_LINES"
+  [ "$QWEN_LINES" -gt 0 ] && printf "  %-10s: %d lines\n" "Qwen" "$QWEN_LINES"
   [ "$BOT_LINES" -gt 0 ] && printf "  %-10s: %d lines\n" "Bot" "$BOT_LINES"
   [ "$RENOVATE_LINES" -gt 0 ] && printf "  %-10s: %d lines\n" "Renovate" "$RENOVATE_LINES"
   [ "$SEMANTIC_LINES" -gt 0 ] && printf "  %-10s: %d lines\n" "Semantic" "$SEMANTIC_LINES"
