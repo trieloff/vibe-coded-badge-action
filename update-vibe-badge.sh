@@ -25,6 +25,7 @@ CURSOR_LINES=0
 WINDSURF_LINES=0
 ZED_LINES=0
 OPENAI_LINES=0
+OPENCODE_LINES=0
 TERRAGON_LINES=0
 GEMINI_LINES=0
 QWEN_LINES=0
@@ -100,9 +101,13 @@ for FILE in $SOURCE_FILES; do
         elif echo "$AUTHOR" | grep -i 'zed' >/dev/null; then
           ZED_LINES=$((ZED_LINES + 1))
           IS_AI=true
-        # Check for OpenAI/OpenCode
-        elif echo "$AUTHOR" | grep -iE 'openai|opencode' >/dev/null; then
+        # Check for OpenAI
+        elif echo "$AUTHOR" | grep -i 'openai' >/dev/null; then
           OPENAI_LINES=$((OPENAI_LINES + 1))
+          IS_AI=true
+        # Check for OpenCode
+        elif echo "$AUTHOR" | grep -i 'opencode' >/dev/null; then
+          OPENCODE_LINES=$((OPENCODE_LINES + 1))
           IS_AI=true
         # Check for Qwen Code
         elif echo "$AUTHOR" | grep -i 'qwen code' >/dev/null || echo "$AUTHOR_EMAIL" | grep -E 'noreply@alibaba\.com' >/dev/null; then
@@ -175,6 +180,11 @@ if [ "$OPENAI_LINES" -gt "$MAX_COUNT" ]; then
   LOGO="openai"
   DOMINANT_AI="OpenAI"
 fi
+if [ "$OPENCODE_LINES" -gt "$MAX_COUNT" ]; then
+  MAX_COUNT="$OPENCODE_LINES"
+  LOGO="githubcopilot"
+  DOMINANT_AI="OpenCode"
+fi
 if [ "$GEMINI_LINES" -gt "$MAX_COUNT" ]; then
   MAX_COUNT="$GEMINI_LINES"
   LOGO="google"
@@ -216,6 +226,7 @@ if $DEBUG; then
   [ "$WINDSURF_LINES" -gt 0 ] && printf "  %-10s: %d lines\n" "Windsurf" "$WINDSURF_LINES"
   [ "$ZED_LINES" -gt 0 ] && printf "  %-10s: %d lines\n" "Zed" "$ZED_LINES"
   [ "$OPENAI_LINES" -gt 0 ] && printf "  %-10s: %d lines\n" "OpenAI" "$OPENAI_LINES"
+  [ "$OPENCODE_LINES" -gt 0 ] && printf "  %-10s: %d lines\n" "OpenCode" "$OPENCODE_LINES"
   [ "$GEMINI_LINES" -gt 0 ] && printf "  %-10s: %d lines\n" "Gemini" "$GEMINI_LINES"
   [ "$QWEN_LINES" -gt 0 ] && printf "  %-10s: %d lines\n" "Qwen" "$QWEN_LINES"
   [ "$BOT_LINES" -gt 0 ] && printf "  %-10s: %d lines\n" "Bot" "$BOT_LINES"
