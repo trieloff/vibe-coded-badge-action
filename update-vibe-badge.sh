@@ -51,17 +51,20 @@ SOURCE_FILES=$(find . -type f \
 for FILE in $SOURCE_FILES; do
   if [ -f "$FILE" ] && [ -r "$FILE" ]; then
     # Use git blame to analyze each line
-    # Get line number counter
-    LINE_NUM=0
-    while IFS= read -r LINE; do
-      LINE_NUM=$((LINE_NUM + 1))
-      if [[ -n "$LINE" ]]; then
-        # Extract author and commit info from git blame for this specific line
-        BLAME_INFO=$(git blame --line-porcelain -L ${LINE_NUM},${LINE_NUM} "$FILE" 2>/dev/null)
-        AUTHOR=$(echo "$BLAME_INFO" | grep "^author " | cut -d' ' -f2-)
-        AUTHOR_EMAIL=$(echo "$BLAME_INFO" | grep "^author-mail " | cut -d' ' -f2- | tr -d '<>')
-        COMMIT_HASH=$(echo "$BLAME_INFO" | head -n1 | cut -d' ' -f1)
-        
+    git blame --line-porcelain "$FILE" | while IFS= read -r LINE; do
+      if [[ "$LINE" == author* ]]; then
+        AUTHOR=$(echo "$LINE" | cut -d' ' -f2-)
+      elif [[ "$LINE" == author-mail* ]]; then
+        AUTHOR_EMAIL=$(echo "$LINE" | cut -d' ' -f2- | tr -d '<>')
+      elif [[ "$LINE" == filename* ]]; then
+        FILENAME=$(echo "$LINE" | cut -d' ' -f2-)
+      elif [[ "$LINE" == summary* ]]; then
+        # This is the content of the line, but we don't need it
+        :
+      elif [[ "$LINE" == commit* ]]; then
+        COMMIT_HASH=$(echo "$LINE" | cut -d' ' -f1)
+      elif [[ "$LINE" == previous* ]]; then
+        # This marks the end of a blame block for a line
         # Skip merge commits (commits with more than one parent)
         if [ -n "$COMMIT_HASH" ] && [ "$COMMIT_HASH" != "0000000000000000000000000000000000000000" ]; then
           PARENT_COUNT=$(git rev-list --parents -n 1 "$COMMIT_HASH" 2>/dev/null | wc -w)
@@ -70,10 +73,10 @@ for FILE in $SOURCE_FILES; do
             continue
           fi
         fi
-        
+
         # Skip empty lines and obvious boilerplate
-        if [[ -n "$(echo "$LINE" | tr -d '[:space:]')" ]] && 
-           [[ ! "$LINE" =~ ^[[:space:]]*# ]] && 
+        if [[ -n "$(echo "$LINE" | tr -d '[:space:]')" ]] &&
+           [[ ! "$LINE" =~ ^[[:space:]]*# ]] &&
            [[ ! "$LINE" =~ ^[[:space:]]*// ]] &&
            [[ ! "$LINE" =~ ^[[:space:]]*\* ]] &&
            [[ ! "$LINE" =~ ^[[:space:]]*\*/ ]] &&
@@ -81,13 +84,13 @@ for FILE in $SOURCE_FILES; do
            [[ ! "$LINE" =~ ^[[:space:]]*package\  ]] &&
            [[ ! "$LINE" =~ ^[[:space:]]*\{?[[:space:]]*\}?$ ]] &&
            [[ ! "$LINE" =~ ^[[:space:]]*$ ]]; then
-          
+
           TOTAL_LINES=$((TOTAL_LINES + 1))
-          
+
           # Determine AI type based on author
           IS_AI=false
           AI_TYPE=""
-          
+
           # Check for Terragon (via Co-authored-by in commit message)
           if git show --format=%B "$COMMIT_HASH" 2>/dev/null | grep -iE 'Co-authored-by:.*terragon' >/dev/null; then
             AI_TYPE="Terragon"
@@ -132,13 +135,13 @@ for FILE in $SOURCE_FILES; do
             fi
             IS_AI=true
           fi
-          
+
           if $IS_AI; then
             AI_LINES=$((AI_LINES + 1))
           fi
         fi
       fi
-    done < "$FILE"
+    done
   fi
 done
 
@@ -246,7 +249,7 @@ if ! $DEBUG; then
   fi
 
   NEW_BADGE="[![${PERCENT}% ${BADGE_TEXT}](https://img.shields.io/badge/${PERCENT}%25-${BADGE_TEXT}-${BADGE_COLOR}?style=${BADGE_STYLE}&logo=${LOGO}&logoColor=white)](https://github.com/trieloff/vibe-coded-badge-action)"
-  
+
   # Export badge for perl to use
   export NEW_BADGE
   export BADGE_TEXT
@@ -259,7 +262,7 @@ if ! $DEBUG; then
     $content =~ s/$badge_re\s*//g;
     # Clean up excessive newlines
     $content =~ s/\n{3,}/\n\n/g;
-    
+
     # Try to insert after first heading, fallback to beginning if no heading
     if ($content =~ /^(#+ [^\n]+)\n/m) {
       $content =~ s/^(#+ [^\n]+)\n/$1\n\n$ENV{NEW_BADGE}\n/m;
@@ -282,7 +285,7 @@ if ! $DEBUG; then
       git config user.email 'github-actions[bot]@users.noreply.github.com'
       git add "$README_PATH"
       git commit -m "$COMMIT_MESSAGE to ${PERCENT}% [skip vibe-badge]"
-      
+
       # Push the changes if we're in GitHub Actions
       if [ -n "${GITHUB_ACTIONS:-}" ]; then
         if [ "$SKIP_ON_ERROR" = "true" ]; then
