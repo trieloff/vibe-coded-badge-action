@@ -337,3 +337,4 @@ if [ -n "${GITHUB_OUTPUT:-}" ]; then
   echo "changed=$BADGE_CHANGED" >> "$GITHUB_OUTPUT"
 fi
 QWEN_TEST_LINE='test'
+TEST_VARIABLE=123
