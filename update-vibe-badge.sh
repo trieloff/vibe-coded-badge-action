@@ -32,6 +32,7 @@ QWEN_LINES=0
 BOT_LINES=0
 RENOVATE_LINES=0
 SEMANTIC_LINES=0
+JULES_LINES=0
 
 # Find all relevant source files
 SOURCE_FILES=$(find . -type f \
@@ -117,6 +118,10 @@ for FILE in $SOURCE_FILES; do
         elif echo "$AUTHOR" | grep -i 'gemini' >/dev/null || echo "$AUTHOR_EMAIL" | grep -E 'noreply@google\.com' >/dev/null; then
           GEMINI_LINES=$((GEMINI_LINES + 1))
           IS_AI=true
+        # Check for Jules
+        elif echo "$AUTHOR" | grep -i 'google-labs-jules\[bot\]' >/dev/null; then
+          JULES_LINES=$((JULES_LINES + 1))
+          IS_AI=true
         # Check for bots
         elif echo "$AUTHOR" | grep -i '\[bot\]' >/dev/null || echo "$AUTHOR" | grep -iE 'renovate|semantic-release' >/dev/null; then
           if echo "$AUTHOR" | grep -i 'renovate' >/dev/null; then
@@ -195,6 +200,11 @@ if [ "$QWEN_LINES" -gt "$MAX_COUNT" ]; then
   LOGO="alibabacloud"
   DOMINANT_AI="Qwen"
 fi
+if [ "$JULES_LINES" -gt "$MAX_COUNT" ]; then
+  MAX_COUNT="$JULES_LINES"
+  LOGO="google"
+  DOMINANT_AI="Jules"
+fi
 if [ "$BOT_LINES" -gt "$MAX_COUNT" ]; then
   MAX_COUNT="$BOT_LINES"
   LOGO="githubactions"
@@ -229,6 +239,7 @@ if $DEBUG; then
   [ "$OPENCODE_LINES" -gt 0 ] && printf "  %-10s: %d lines\n" "OpenCode" "$OPENCODE_LINES"
   [ "$GEMINI_LINES" -gt 0 ] && printf "  %-10s: %d lines\n" "Gemini" "$GEMINI_LINES"
   [ "$QWEN_LINES" -gt 0 ] && printf "  %-10s: %d lines\n" "Qwen" "$QWEN_LINES"
+  [ "$JULES_LINES" -gt 0 ] && printf "  %-10s: %d lines\n" "Jules" "$JULES_LINES"
   [ "$BOT_LINES" -gt 0 ] && printf "  %-10s: %d lines\n" "Bot" "$BOT_LINES"
   [ "$RENOVATE_LINES" -gt 0 ] && printf "  %-10s: %d lines\n" "Renovate" "$RENOVATE_LINES"
   [ "$SEMANTIC_LINES" -gt 0 ] && printf "  %-10s: %d lines\n" "Semantic" "$SEMANTIC_LINES"
