@@ -29,6 +29,9 @@ OPENCODE_LINES=0
 TERRAGON_LINES=0
 GEMINI_LINES=0
 QWEN_LINES=0
+AMP_LINES=0
+DROID_LINES=0
+COPILOT_LINES=0
 BOT_LINES=0
 RENOVATE_LINES=0
 SEMANTIC_LINES=0
@@ -117,6 +120,18 @@ for FILE in $SOURCE_FILES; do
         elif echo "$AUTHOR" | grep -i 'gemini' >/dev/null || echo "$AUTHOR_EMAIL" | grep -E 'noreply@google\.com' >/dev/null; then
           GEMINI_LINES=$((GEMINI_LINES + 1))
           IS_AI=true
+        # Check for Amp (Sourcegraph)
+        elif echo "$AUTHOR" | grep -iw 'amp' >/dev/null || echo "$AUTHOR_EMAIL" | grep -E 'noreply@sourcegraph\.com' >/dev/null; then
+          AMP_LINES=$((AMP_LINES + 1))
+          IS_AI=true
+        # Check for Droid (Factory AI)
+        elif echo "$AUTHOR" | grep -iw 'droid' >/dev/null || echo "$AUTHOR_EMAIL" | grep -E 'droid@factory\.ai' >/dev/null; then
+          DROID_LINES=$((DROID_LINES + 1))
+          IS_AI=true
+        # Check for GitHub Copilot
+        elif echo "$AUTHOR" | grep -i 'copilot' >/dev/null || echo "$AUTHOR_EMAIL" | grep -E 'copilot@github\.com' >/dev/null; then
+          COPILOT_LINES=$((COPILOT_LINES + 1))
+          IS_AI=true
         # Check for bots
         elif echo "$AUTHOR" | grep -i '\[bot\]' >/dev/null || echo "$AUTHOR" | grep -iE 'renovate|semantic-release' >/dev/null; then
           if echo "$AUTHOR" | grep -i 'renovate' >/dev/null; then
@@ -195,6 +210,21 @@ if [ "$QWEN_LINES" -gt "$MAX_COUNT" ]; then
   LOGO="alibabacloud"
   DOMINANT_AI="Qwen"
 fi
+if [ "$AMP_LINES" -gt "$MAX_COUNT" ]; then
+  MAX_COUNT="$AMP_LINES"
+  LOGO="sourcegraph"
+  DOMINANT_AI="Amp"
+fi
+if [ "$DROID_LINES" -gt "$MAX_COUNT" ]; then
+  MAX_COUNT="$DROID_LINES"
+  LOGO="robot"
+  DOMINANT_AI="Droid"
+fi
+if [ "$COPILOT_LINES" -gt "$MAX_COUNT" ]; then
+  MAX_COUNT="$COPILOT_LINES"
+  LOGO="githubcopilot"
+  DOMINANT_AI="Copilot"
+fi
 if [ "$BOT_LINES" -gt "$MAX_COUNT" ]; then
   MAX_COUNT="$BOT_LINES"
   LOGO="githubactions"
@@ -229,6 +259,9 @@ if $DEBUG; then
   [ "$OPENCODE_LINES" -gt 0 ] && printf "  %-10s: %d lines\n" "OpenCode" "$OPENCODE_LINES"
   [ "$GEMINI_LINES" -gt 0 ] && printf "  %-10s: %d lines\n" "Gemini" "$GEMINI_LINES"
   [ "$QWEN_LINES" -gt 0 ] && printf "  %-10s: %d lines\n" "Qwen" "$QWEN_LINES"
+  [ "$AMP_LINES" -gt 0 ] && printf "  %-10s: %d lines\n" "Amp" "$AMP_LINES"
+  [ "$DROID_LINES" -gt 0 ] && printf "  %-10s: %d lines\n" "Droid" "$DROID_LINES"
+  [ "$COPILOT_LINES" -gt 0 ] && printf "  %-10s: %d lines\n" "Copilot" "$COPILOT_LINES"
   [ "$BOT_LINES" -gt 0 ] && printf "  %-10s: %d lines\n" "Bot" "$BOT_LINES"
   [ "$RENOVATE_LINES" -gt 0 ] && printf "  %-10s: %d lines\n" "Renovate" "$RENOVATE_LINES"
   [ "$SEMANTIC_LINES" -gt 0 ] && printf "  %-10s: %d lines\n" "Semantic" "$SEMANTIC_LINES"

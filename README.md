@@ -18,7 +18,7 @@ This project is part of a suite of tools designed for the emerging world of **vi
 
 ## Features
 
-- **Smart AI Detection**: Identifies commits from Claude, Cursor, Zed, Windsurf, OpenAI, Codex, Gemini, and various bots
+- **Smart AI Detection**: Identifies commits from Claude, Cursor, Zed, Windsurf, OpenAI, Codex, Gemini, Qwen, Amp, Droid, GitHub Copilot, and various bots
 - **Dynamic Logo Selection**: Automatically chooses the logo based on which AI tool contributed the most
 - **Flexible Configuration**: Customizable badge style, colors, text, and target file
 - **Debug Mode**: Detailed analysis of commit classification
@@ -95,7 +95,13 @@ The action identifies AI-generated code by analyzing git blame data:
    - Zed
    - Windsurf
    - OpenAI
+   - OpenCode
    - Gemini (Google)
+   - Qwen (Alibaba)
+   - Amp (Sourcegraph)
+   - Droid (Factory AI)
+   - GitHub Copilot
+   - Terragon
    - Various bot accounts
 3. **Line Filtering**: Filters out boilerplate lines (comments, empty lines, imports) for accuracy
 4. **File Type Support**: Analyzes source files across multiple programming languages
@@ -106,11 +112,16 @@ The action identifies AI-generated code by analyzing git blame data:
 The badge automatically selects the appropriate logo based on which AI tool has the most commits:
 
 - **Claude** → `claude` logo
-- **Codex** → `openai` logo  
+- **Terragon** → `claude` logo
+- **Codex** → `openai` logo
 - **Windsurf** → `windsurf` logo
 - **Cursor** → `githubcopilot` logo
 - **Zed** → `zedindustries` logo
 - **Gemini** → `google` logo
+- **Qwen** → `alibabacloud` logo
+- **Amp** → `sourcegraph` logo
+- **Droid** → `robot` logo
+- **GitHub Copilot** → `githubcopilot` logo
 - **Renovate** → `renovatebot` logo
 - **Semantic Release** → `semanticrelease` logo
 - **Other Bots** → `githubactions` logo
@@ -162,6 +173,18 @@ git config --global alias.openai-commit '!f() { msg="$1"; shift 1; git -c user.n
 
 # Gemini commits
 git config --global alias.gemini-commit '!f() { msg="$1"; shift 1; git -c user.name="Gemini" -c user.email="noreply@google.com" -c commit.gpgsign=false commit -m "$msg" -m "Signed-off-by: $(git config user.name) <$(git config user.email)>" "$@"; }; f'
+
+# Qwen Code commits
+git config --global alias.qwen-commit '!f() { msg="$1"; shift 1; git -c user.name="Qwen Code" -c user.email="noreply@alibaba.com" -c commit.gpgsign=false commit -m "$msg" -m "Signed-off-by: $(git config user.name) <$(git config user.email)>" "$@"; }; f'
+
+# Amp (Sourcegraph) commits
+git config --global alias.amp-commit '!f() { msg="$1"; shift 1; git -c user.name="Amp" -c user.email="noreply@sourcegraph.com" -c commit.gpgsign=false commit -m "$msg" -m "Signed-off-by: $(git config user.name) <$(git config user.email)>" "$@"; }; f'
+
+# Droid (Factory AI) commits
+git config --global alias.droid-commit '!f() { msg="$1"; shift 1; git -c user.name="Droid" -c user.email="droid@factory.ai" -c commit.gpgsign=false commit -m "$msg" -m "Signed-off-by: $(git config user.name) <$(git config user.email)>" "$@"; }; f'
+
+# GitHub Copilot commits
+git config --global alias.copilot-commit '!f() { msg="$1"; shift 1; git -c user.name="GitHub Copilot" -c user.email="copilot@github.com" -c commit.gpgsign=false commit -m "$msg" -m "Signed-off-by: $(git config user.name) <$(git config user.email)>" "$@"; }; f'
 ```
 
 ### Usage
@@ -172,11 +195,17 @@ Instead of regular `git commit`, use the AI-specific aliases:
 # Instead of: git commit -m "Add new feature"
 git claude-commit "Add new feature"
 
-# Instead of: git commit -m "Fix bug in parser"  
+# Instead of: git commit -m "Fix bug in parser"
 git zed-commit "Fix bug in parser"
 
 # Instead of: git commit -m "Refactor database layer"
 git cursor-commit "Refactor database layer"
+
+# For other AI tools:
+git qwen-commit "Optimize algorithm"
+git amp-commit "Add search functionality"
+git droid-commit "Generate unit tests"
+git copilot-commit "Implement feature X"
 ```
 
 ### Benefits
