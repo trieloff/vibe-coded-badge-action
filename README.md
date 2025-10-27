@@ -6,16 +6,16 @@ A GitHub Action that automatically analyzes your repository's git history to det
 
 ![a_futuristic_glow_image](https://github.com/user-attachments/assets/0350cfe6-7631-4613-aa3e-74e2bd53eda4)
 
-## The Vibe Coding Ecosystem
+## Related Projects
 
-This project is part of a suite of tools designed for the emerging world of **vibe coding** - a new AI-assisted software development paradigm where developers guide AI tools through natural language to build software, embracing the collaborative potential of human-AI partnership.
+Part of the **[AI Ecoverse](https://github.com/trieloff/ai-ecoverse)** - a comprehensive ecosystem of tools for AI-assisted development:
 
-### Related Projects
-
-- **[ai-aligned-git](https://github.com/trieloff/ai-aligned-git)** - A humorous Git wrapper that ensures AI coding agents maintain clean, attributed commits and follow best practices
-- **[ai-aligned-gh](https://github.com/trieloff/ai-aligned-gh)** - A transparent GitHub CLI wrapper that automatically detects AI tool usage and ensures proper bot attribution for GitHub actions
-- **[gh-workflow-peek](https://github.com/trieloff/gh-workflow-peek)** - A GitHub CLI extension for intelligently filtering workflow errors, perfect for AI agents working with limited context windows
-- **[yolo](https://github.com/trieloff/yolo)** - A portable AI agent launcher that adds the right bypass flags and supports isolated git worktrees for safe experimentation
+- **[yolo](https://github.com/trieloff/yolo)** - AI CLI launcher with worktree isolation
+- **[ai-aligned-git](https://github.com/trieloff/ai-aligned-git)** - Git wrapper for safe AI commit practices
+- **[ai-aligned-gh](https://github.com/trieloff/ai-aligned-gh)** - GitHub CLI wrapper for proper AI attribution
+- **[gh-workflow-peek](https://github.com/trieloff/gh-workflow-peek)** - Smarter GitHub Actions log filtering
+- **[upskill](https://github.com/trieloff/upskill)** - Install Claude/Agent skills from other repositories
+- **[as-a-bot](https://github.com/trieloff/as-a-bot)** - GitHub App token broker for proper AI attribution
 
 ## Features
 
