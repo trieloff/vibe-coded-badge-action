@@ -19,7 +19,7 @@ Part of the **[AI Ecoverse](https://github.com/trieloff/ai-ecoverse)** - a compr
 
 ## Features
 
-- **Smart AI Detection**: Identifies commits from Claude, Cursor, Zed, Windsurf, OpenAI, Codex, Gemini, Qwen, Amp, Droid, GitHub Copilot, and various bots
+- **Smart AI Detection**: Identifies commits from Claude, Cursor, Zed, Windsurf, OpenAI, Codex, Gemini, Qwen, Amp, Droid, GitHub Copilot, Aider, Cline, Crush, Kimi, and various bots
 - **Dynamic Logo Selection**: Automatically chooses the logo based on which AI tool contributed the most
 - **Flexible Configuration**: Customizable badge style, colors, text, and target file
 - **Debug Mode**: Detailed analysis of commit classification
@@ -102,6 +102,10 @@ The action identifies AI-generated code by analyzing git blame data:
    - Amp (Sourcegraph)
    - Droid (Factory AI)
    - GitHub Copilot
+   - Aider
+   - Cline
+   - Crush (Charm)
+   - Kimi (Moonshot AI)
    - Terragon
    - Various bot accounts
 3. **Line Filtering**: Filters out boilerplate lines (comments, empty lines, imports) for accuracy
@@ -123,6 +127,10 @@ The badge automatically selects the appropriate logo based on which AI tool has 
 - **Amp** → `sourcegraph` logo
 - **Droid** → `robot` logo
 - **GitHub Copilot** → `githubcopilot` logo
+- **Aider** → `openai` logo
+- **Cline** → `claude` logo
+- **Crush** → `robot` logo
+- **Kimi** → `openai` logo
 - **Renovate** → `renovatebot` logo
 - **Semantic Release** → `semanticrelease` logo
 - **Other Bots** → `githubactions` logo
@@ -186,6 +194,18 @@ git config --global alias.droid-commit '!f() { msg="$1"; shift 1; git -c user.na
 
 # GitHub Copilot commits
 git config --global alias.copilot-commit '!f() { msg="$1"; shift 1; git -c user.name="GitHub Copilot" -c user.email="copilot@github.com" -c commit.gpgsign=false commit -m "$msg" -m "Signed-off-by: $(git config user.name) <$(git config user.email)>" "$@"; }; f'
+
+# Aider commits
+git config --global alias.aider-commit '!f() { msg="$1"; shift 1; git -c user.name="$(git config user.name) (aider)" -c user.email="aider@aider.chat" -c commit.gpgsign=false commit -m "$msg" -m "Signed-off-by: $(git config user.name) <$(git config user.email)>" "$@"; }; f'
+
+# Cline commits
+git config --global alias.cline-commit '!f() { msg="$1"; shift 1; git -c user.name="Cline" -c user.email="noreply@cline.bot" -c commit.gpgsign=false commit -m "$msg" -m "Signed-off-by: $(git config user.name) <$(git config user.email)>" "$@"; }; f'
+
+# Crush commits
+git config --global alias.crush-commit '!f() { msg="$1"; shift 1; git -c user.name="Crush" -c user.email="crush@charm.land" -c commit.gpgsign=false commit -m "$msg" -m "Signed-off-by: $(git config user.name) <$(git config user.email)>" "$@"; }; f'
+
+# Kimi commits
+git config --global alias.kimi-commit '!f() { msg="$1"; shift 1; git -c user.name="Kimi" -c user.email="noreply@moonshot.ai" -c commit.gpgsign=false commit -m "$msg" -m "Signed-off-by: $(git config user.name) <$(git config user.email)>" "$@"; }; f'
 ```
 
 ### Usage
@@ -207,6 +227,10 @@ git qwen-commit "Optimize algorithm"
 git amp-commit "Add search functionality"
 git droid-commit "Generate unit tests"
 git copilot-commit "Implement feature X"
+git aider-commit "Refactor module structure"
+git cline-commit "Add validation logic"
+git crush-commit "Improve error messages"
+git kimi-commit "Implement new API endpoint"
 ```
 
 ### Benefits
