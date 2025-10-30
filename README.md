@@ -103,7 +103,7 @@ The action identifies AI-generated code by analyzing git blame data:
    - Droid (Factory AI)
    - GitHub Copilot
    - Aider
-   - Cline (formerly Claude Dev)
+   - Cline
    - Crush (Charm)
    - Kimi (Moonshot AI)
    - Terragon

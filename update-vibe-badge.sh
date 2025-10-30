@@ -140,8 +140,8 @@ for FILE in $SOURCE_FILES; do
         elif echo "$AUTHOR" | grep -iE '\(aider\)|^aider' >/dev/null || echo "$AUTHOR_EMAIL" | grep -E 'aider@aider\.chat' >/dev/null || git show --format=%B "$COMMIT_HASH" 2>/dev/null | grep -iE 'Co-authored-by:.*aider' >/dev/null; then
           AIDER_LINES=$((AIDER_LINES + 1))
           IS_AI=true
-        # Check for Cline (formerly Claude Dev)
-        elif echo "$AUTHOR" | grep -iE 'cline|claude dev' >/dev/null || echo "$AUTHOR_EMAIL" | grep -iE 'cline|claude.?dev' >/dev/null; then
+        # Check for Cline
+        elif echo "$AUTHOR" | grep -iw 'cline' >/dev/null || echo "$AUTHOR_EMAIL" | grep -iE 'cline@|noreply@cline\.bot' >/dev/null; then
           CLINE_LINES=$((CLINE_LINES + 1))
           IS_AI=true
         # Check for Crush (Charm)
