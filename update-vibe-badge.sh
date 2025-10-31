@@ -291,37 +291,59 @@ if [ "$SEMANTIC_LINES" -gt "$MAX_COUNT" ]; then
   DOMINANT_AI="Semantic"
 fi
 
-# Display debug output
+# Output summary of detected AI agents (always shown in workflow logs)
+echo "=== Vibe Coded Badge Analysis ==="
+echo "Total lines of code: $TOTAL_LINES"
+echo "AI-generated lines: $AI_LINES (${PERCENT}%)"
+echo "Human-written lines: $((TOTAL_LINES - AI_LINES)) ($((100 - PERCENT))%)"
+echo ""
+echo "Detected AI Agents/Bots (sorted by contributed lines):"
+
+# Create a temporary array for sorting
+declare -a ai_agents=()
+
+# Populate array with AI agents that have contributions
+[ "$CLAUDE_LINES" -gt 0 ] && ai_agents+=("$CLAUDE_LINES|Claude")
+[ "$TERRAGON_LINES" -gt 0 ] && ai_agents+=("$TERRAGON_LINES|Terragon")
+[ "$CURSOR_LINES" -gt 0 ] && ai_agents+=("$CURSOR_LINES|Cursor")
+[ "$WINDSURF_LINES" -gt 0 ] && ai_agents+=("$WINDSURF_LINES|Windsurf")
+[ "$ZED_LINES" -gt 0 ] && ai_agents+=("$ZED_LINES|Zed")
+[ "$OPENAI_LINES" -gt 0 ] && ai_agents+=("$OPENAI_LINES|OpenAI")
+[ "$OPENCODE_LINES" -gt 0 ] && ai_agents+=("$OPENCODE_LINES|OpenCode")
+[ "$GEMINI_LINES" -gt 0 ] && ai_agents+=("$GEMINI_LINES|Gemini")
+[ "$QWEN_LINES" -gt 0 ] && ai_agents+=("$QWEN_LINES|Qwen")
+[ "$JULES_LINES" -gt 0 ] && ai_agents+=("$JULES_LINES|Jules")
+[ "$AMP_LINES" -gt 0 ] && ai_agents+=("$AMP_LINES|Amp")
+[ "$DROID_LINES" -gt 0 ] && ai_agents+=("$DROID_LINES|Droid")
+[ "$COPILOT_LINES" -gt 0 ] && ai_agents+=("$COPILOT_LINES|Copilot")
+[ "$AIDER_LINES" -gt 0 ] && ai_agents+=("$AIDER_LINES|Aider")
+[ "$CLINE_LINES" -gt 0 ] && ai_agents+=("$CLINE_LINES|Cline")
+[ "$CRUSH_LINES" -gt 0 ] && ai_agents+=("$CRUSH_LINES|Crush")
+[ "$KIMI_LINES" -gt 0 ] && ai_agents+=("$KIMI_LINES|Kimi")
+[ "$BOT_LINES" -gt 0 ] && ai_agents+=("$BOT_LINES|Bot")
+[ "$RENOVATE_LINES" -gt 0 ] && ai_agents+=("$RENOVATE_LINES|Renovate")
+[ "$SEMANTIC_LINES" -gt 0 ] && ai_agents+=("$SEMANTIC_LINES|Semantic")
+
+# Sort by line count (descending) and display
+if [ ${#ai_agents[@]} -gt 0 ]; then
+  # Sort numerically in reverse order and format output
+  printf '%s\n' "${ai_agents[@]}" | sort -t'|' -k1 -rn | while IFS='|' read -r lines name; do
+    percentage=$((100 * lines / TOTAL_LINES))
+    printf "  %-15s: %6d lines (%2d%%)\n" "$name" "$lines" "$percentage"
+  done
+else
+  echo "  No AI agents detected"
+fi
+
+echo ""
+echo "Dominant AI: $DOMINANT_AI ($MAX_COUNT lines)"
+echo "Selected badge logo: $LOGO"
+echo ""
+
+# Display additional debug output if enabled
 if $DEBUG; then
-  echo "=== Vibe Badge Debug Mode (Line-based) ==="
-  echo "Total lines of code: $TOTAL_LINES"
-  echo ""
-  echo "AI-generated lines: $AI_LINES (${PERCENT}%)"
-  echo "Human-written lines: $((TOTAL_LINES - AI_LINES)) ($((100 - PERCENT))%)"
-  echo ""
-  echo "AI Breakdown by lines:"
-  [ "$CLAUDE_LINES" -gt 0 ] && printf "  %-10s: %d lines\n" "Claude" "$CLAUDE_LINES"
-  [ "$TERRAGON_LINES" -gt 0 ] && printf "  %-10s: %d lines\n" "Terragon" "$TERRAGON_LINES"
-  [ "$CURSOR_LINES" -gt 0 ] && printf "  %-10s: %d lines\n" "Cursor" "$CURSOR_LINES"
-  [ "$WINDSURF_LINES" -gt 0 ] && printf "  %-10s: %d lines\n" "Windsurf" "$WINDSURF_LINES"
-  [ "$ZED_LINES" -gt 0 ] && printf "  %-10s: %d lines\n" "Zed" "$ZED_LINES"
-  [ "$OPENAI_LINES" -gt 0 ] && printf "  %-10s: %d lines\n" "OpenAI" "$OPENAI_LINES"
-  [ "$OPENCODE_LINES" -gt 0 ] && printf "  %-10s: %d lines\n" "OpenCode" "$OPENCODE_LINES"
-  [ "$GEMINI_LINES" -gt 0 ] && printf "  %-10s: %d lines\n" "Gemini" "$GEMINI_LINES"
-  [ "$QWEN_LINES" -gt 0 ] && printf "  %-10s: %d lines\n" "Qwen" "$QWEN_LINES"
-  [ "$JULES_LINES" -gt 0 ] && printf "  %-10s: %d lines\n" "Jules" "$JULES_LINES"
-  [ "$AMP_LINES" -gt 0 ] && printf "  %-10s: %d lines\n" "Amp" "$AMP_LINES"
-  [ "$DROID_LINES" -gt 0 ] && printf "  %-10s: %d lines\n" "Droid" "$DROID_LINES"
-  [ "$COPILOT_LINES" -gt 0 ] && printf "  %-10s: %d lines\n" "Copilot" "$COPILOT_LINES"
-  [ "$AIDER_LINES" -gt 0 ] && printf "  %-10s: %d lines\n" "Aider" "$AIDER_LINES"
-  [ "$CLINE_LINES" -gt 0 ] && printf "  %-10s: %d lines\n" "Cline" "$CLINE_LINES"
-  [ "$CRUSH_LINES" -gt 0 ] && printf "  %-10s: %d lines\n" "Crush" "$CRUSH_LINES"
-  [ "$KIMI_LINES" -gt 0 ] && printf "  %-10s: %d lines\n" "Kimi" "$KIMI_LINES"
-  [ "$BOT_LINES" -gt 0 ] && printf "  %-10s: %d lines\n" "Bot" "$BOT_LINES"
-  [ "$RENOVATE_LINES" -gt 0 ] && printf "  %-10s: %d lines\n" "Renovate" "$RENOVATE_LINES"
-  [ "$SEMANTIC_LINES" -gt 0 ] && printf "  %-10s: %d lines\n" "Semantic" "$SEMANTIC_LINES"
-  echo ""
-  echo "Selected logo: $LOGO (Dominant AI: $DOMINANT_AI)"
+  echo "=== Extended Debug Information ==="
+  echo "Selected logo: $LOGO"
   echo ""
 fi
 
