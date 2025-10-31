@@ -19,7 +19,7 @@ Part of the **[AI Ecoverse](https://github.com/trieloff/ai-ecoverse)** - a compr
 
 ## Features
 
-- **Smart AI Detection**: Identifies commits from Claude, Cursor, Zed, Windsurf, OpenAI, Codex, Gemini, Jules, Qwen, Amp, Droid, GitHub Copilot, Aider, Cline, Crush, Kimi, and various bots
+- **Smart AI Detection**: Identifies commits from Claude, Cursor, Zed, Windsurf, OpenAI, Codex, Gemini, Jules, Qwen, Amp, Droid, GitHub Copilot, Aider, Cline, Crush, Kimi, Goose, and various bots
 - **Dynamic Logo Selection**: Automatically chooses the logo based on which AI tool contributed the most
 - **Flexible Configuration**: Customizable badge style, colors, text, and target file
 - **Debug Mode**: Detailed analysis of commit classification
@@ -107,6 +107,7 @@ The action identifies AI-generated code by analyzing git blame data:
    - Cline
    - Crush (Charm)
    - Kimi (Moonshot AI)
+   - Goose (Block)
    - Terragon
    - Various bot accounts
 3. **Line Filtering**: Filters out boilerplate lines (comments, empty lines, imports) for accuracy
@@ -133,6 +134,7 @@ The badge automatically selects the appropriate logo based on which AI tool has 
 - **Cline** → `claude` logo
 - **Crush** → `robot` logo
 - **Kimi** → `openai` logo
+- **Goose** → `block` logo
 - **Renovate** → `renovatebot` logo
 - **Semantic Release** → `semanticrelease` logo
 - **Other Bots** → `githubactions` logo
@@ -211,6 +213,9 @@ git config --global alias.crush-commit '!f() { msg="$1"; shift 1; git -c user.na
 
 # Kimi commits
 git config --global alias.kimi-commit '!f() { msg="$1"; shift 1; git -c user.name="Kimi" -c user.email="noreply@moonshot.ai" -c commit.gpgsign=false commit -m "$msg" -m "Signed-off-by: $(git config user.name) <$(git config user.email)>" "$@"; }; f'
+
+# Goose commits
+git config --global alias.goose-commit '!f() { msg="$1"; shift 1; git -c user.name="Goose User" -c user.email="goose@example.com" -c commit.gpgsign=false commit -m "$msg" -m "Signed-off-by: $(git config user.name) <$(git config user.email)>" "$@"; }; f'
 ```
 
 ### Usage
@@ -237,6 +242,7 @@ git aider-commit "Refactor module structure"
 git cline-commit "Add validation logic"
 git crush-commit "Improve error messages"
 git kimi-commit "Implement new API endpoint"
+git goose-commit "Add new feature"
 ```
 
 ### Benefits
