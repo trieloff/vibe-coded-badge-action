@@ -36,6 +36,7 @@ AIDER_LINES=0
 CLINE_LINES=0
 CRUSH_LINES=0
 KIMI_LINES=0
+GOOSE_LINES=0
 BOT_LINES=0
 RENOVATE_LINES=0
 SEMANTIC_LINES=0
@@ -157,6 +158,10 @@ for FILE in $SOURCE_FILES; do
         elif echo "$AUTHOR" | grep -iw 'kimi' >/dev/null || echo "$AUTHOR_EMAIL" | grep -E 'kimi@moonshot\.' >/dev/null; then
           KIMI_LINES=$((KIMI_LINES + 1))
           IS_AI=true
+        # Check for Goose (Block)
+        elif echo "$AUTHOR" | grep -iw 'goose' >/dev/null || echo "$AUTHOR_EMAIL" | grep -E 'goose@(example\.com|opensource\.block\.xyz)' >/dev/null; then
+          GOOSE_LINES=$((GOOSE_LINES + 1))
+          IS_AI=true
         # Check for bots
         elif echo "$AUTHOR" | grep -i '\[bot\]' >/dev/null || echo "$AUTHOR" | grep -iE 'renovate|semantic-release' >/dev/null; then
           if echo "$AUTHOR" | grep -i 'renovate' >/dev/null; then
@@ -275,6 +280,11 @@ if [ "$KIMI_LINES" -gt "$MAX_COUNT" ]; then
   LOGO="openai"
   DOMINANT_AI="Kimi"
 fi
+if [ "$GOOSE_LINES" -gt "$MAX_COUNT" ]; then
+  MAX_COUNT="$GOOSE_LINES"
+  LOGO="block"
+  DOMINANT_AI="Goose"
+fi
 if [ "$BOT_LINES" -gt "$MAX_COUNT" ]; then
   MAX_COUNT="$BOT_LINES"
   LOGO="githubactions"
@@ -320,6 +330,7 @@ declare -a ai_agents=()
 [ "$CLINE_LINES" -gt 0 ] && ai_agents+=("$CLINE_LINES|Cline")
 [ "$CRUSH_LINES" -gt 0 ] && ai_agents+=("$CRUSH_LINES|Crush")
 [ "$KIMI_LINES" -gt 0 ] && ai_agents+=("$KIMI_LINES|Kimi")
+[ "$GOOSE_LINES" -gt 0 ] && ai_agents+=("$GOOSE_LINES|Goose")
 [ "$BOT_LINES" -gt 0 ] && ai_agents+=("$BOT_LINES|Bot")
 [ "$RENOVATE_LINES" -gt 0 ] && ai_agents+=("$RENOVATE_LINES|Renovate")
 [ "$SEMANTIC_LINES" -gt 0 ] && ai_agents+=("$SEMANTIC_LINES|Semantic")
