@@ -368,16 +368,8 @@ BADGE_CHANGED=false
 
 # Only update badge if not in debug mode
 if ! $DEBUG; then
-  # Get repository information for the badge URL
-  REPO_URL=$(git config --get remote.origin.url 2>/dev/null || echo "")
-  if [[ "$REPO_URL" =~ github\.com[:/]([^/]+)/([^/]+)\.git$ ]]; then
-    REPO_OWNER="${BASH_REMATCH[1]}"
-    REPO_NAME="${BASH_REMATCH[2]}"
-    GITHUB_URL="https://github.com/$REPO_OWNER/$REPO_NAME"
-  else
-    # Fallback to a generic URL
-    GITHUB_URL="https://github.com"
-  fi
+  # Note: Repository information extraction kept for potential future use
+  # Currently, badge URL is hardcoded to the action repository
 
   NEW_BADGE="[![${PERCENT}% ${BADGE_TEXT}](https://img.shields.io/badge/${PERCENT}%25-${BADGE_TEXT}-${BADGE_COLOR}?style=${BADGE_STYLE}&logo=${LOGO}&logoColor=white)](https://github.com/trieloff/vibe-coded-badge-action)"
 
