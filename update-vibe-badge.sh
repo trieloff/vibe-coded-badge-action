@@ -364,6 +364,69 @@ if [ -n "${GITHUB_OUTPUT:-}" ]; then
   echo "dominant-ai=$DOMINANT_AI" >> "$GITHUB_OUTPUT"
 fi
 
+# Create GitHub Actions Job Summary
+if [ -n "${GITHUB_STEP_SUMMARY:-}" ]; then
+  echo "## 🤖 Vibe Coded Badge Analysis" >> "$GITHUB_STEP_SUMMARY"
+  echo "" >> "$GITHUB_STEP_SUMMARY"
+  echo "**Total lines analyzed:** $TOTAL_LINES" >> "$GITHUB_STEP_SUMMARY"
+  echo "" >> "$GITHUB_STEP_SUMMARY"
+  echo "- 🤖 **AI-generated:** $AI_LINES lines (**${PERCENT}%**)" >> "$GITHUB_STEP_SUMMARY"
+  echo "- 👤 **Human-written:** $((TOTAL_LINES - AI_LINES)) lines (**$((100 - PERCENT))%**)" >> "$GITHUB_STEP_SUMMARY"
+  echo "" >> "$GITHUB_STEP_SUMMARY"
+
+  if [ ${#ai_agents[@]} -gt 0 ]; then
+    echo "### 🏆 Detected AI Agents/Bots" >> "$GITHUB_STEP_SUMMARY"
+    echo "" >> "$GITHUB_STEP_SUMMARY"
+    echo "| Rank | AI Agent | Lines | Percentage | Logo |" >> "$GITHUB_STEP_SUMMARY"
+    echo "|------|----------|------:|------------|------|" >> "$GITHUB_STEP_SUMMARY"
+
+    rank=1
+    # Sort and create table rows
+    printf '%s\n' "${ai_agents[@]}" | sort -t'|' -k1 -rn | while IFS='|' read -r lines name; do
+      percentage=$((100 * lines / TOTAL_LINES))
+
+      # Determine logo for each agent
+      agent_logo=""
+      case "$name" in
+        "Claude"|"Terragon"|"Cline") agent_logo="claude" ;;
+        "OpenAI"|"Aider"|"Kimi") agent_logo="openai" ;;
+        "Cursor"|"OpenCode"|"Copilot") agent_logo="githubcopilot" ;;
+        "Windsurf") agent_logo="windsurf" ;;
+        "Zed") agent_logo="zedindustries" ;;
+        "Gemini"|"Jules") agent_logo="google" ;;
+        "Qwen") agent_logo="alibabacloud" ;;
+        "Amp") agent_logo="sourcegraph" ;;
+        "Droid"|"Crush") agent_logo="robot" ;;
+        "Goose") agent_logo="block" ;;
+        "Renovate") agent_logo="renovatebot" ;;
+        "Semantic") agent_logo="semanticrelease" ;;
+        "Bot") agent_logo="githubactions" ;;
+      esac
+
+      # Add medal for top 3
+      medal=""
+      if [ "$rank" -eq 1 ]; then medal="🥇"; fi
+      if [ "$rank" -eq 2 ]; then medal="🥈"; fi
+      if [ "$rank" -eq 3 ]; then medal="🥉"; fi
+
+      echo "| $medal $rank | **$name** | $lines | $percentage% | ![${agent_logo}](https://img.shields.io/badge/-${agent_logo}-black?style=flat-square&logo=${agent_logo}&logoColor=white) |" >> "$GITHUB_STEP_SUMMARY"
+      rank=$((rank + 1))
+    done
+
+    echo "" >> "$GITHUB_STEP_SUMMARY"
+    echo "**🏅 Dominant AI:** $DOMINANT_AI with $MAX_COUNT lines" >> "$GITHUB_STEP_SUMMARY"
+    echo "" >> "$GITHUB_STEP_SUMMARY"
+    echo "**🎨 Selected badge logo:** \`$LOGO\`" >> "$GITHUB_STEP_SUMMARY"
+  else
+    echo "No AI agents detected in this repository." >> "$GITHUB_STEP_SUMMARY"
+  fi
+
+  echo "" >> "$GITHUB_STEP_SUMMARY"
+  echo "---" >> "$GITHUB_STEP_SUMMARY"
+  echo "" >> "$GITHUB_STEP_SUMMARY"
+  echo "_Badge updated: $(date -u '+%Y-%m-%d %H:%M:%S UTC')_" >> "$GITHUB_STEP_SUMMARY"
+fi
+
 BADGE_CHANGED=false
 
 # Only update badge if not in debug mode
