@@ -19,7 +19,7 @@ Part of the **[AI Ecoverse](https://github.com/trieloff/ai-ecoverse)** - a compr
 
 ## Features
 
-- **Smart AI Detection**: Identifies commits from Claude, Cursor, Zed, Windsurf, OpenAI, Codex, Gemini, Qwen, Amp, Droid, GitHub Copilot, Aider, Cline, Crush, Kimi, and various bots
+- **Smart AI Detection**: Identifies commits from Claude, Cursor, Zed, Windsurf, OpenAI, Codex, Gemini, Jules, Qwen, Amp, Droid, GitHub Copilot, Aider, Cline, Crush, Kimi, and various bots
 - **Dynamic Logo Selection**: Automatically chooses the logo based on which AI tool contributed the most
 - **Flexible Configuration**: Customizable badge style, colors, text, and target file
 - **Debug Mode**: Detailed analysis of commit classification
@@ -98,6 +98,7 @@ The action identifies AI-generated code by analyzing git blame data:
    - OpenAI
    - OpenCode
    - Gemini (Google)
+   - Jules
    - Qwen (Alibaba)
    - Amp (Sourcegraph)
    - Droid (Factory AI)
@@ -123,6 +124,7 @@ The badge automatically selects the appropriate logo based on which AI tool has 
 - **Cursor** → `githubcopilot` logo
 - **Zed** → `zedindustries` logo
 - **Gemini** → `google` logo
+- **Jules** → `google` logo
 - **Qwen** → `alibabacloud` logo
 - **Amp** → `sourcegraph` logo
 - **Droid** → `robot` logo
@@ -183,6 +185,9 @@ git config --global alias.openai-commit '!f() { msg="$1"; shift 1; git -c user.n
 # Gemini commits
 git config --global alias.gemini-commit '!f() { msg="$1"; shift 1; git -c user.name="Gemini" -c user.email="noreply@google.com" -c commit.gpgsign=false commit -m "$msg" -m "Signed-off-by: $(git config user.name) <$(git config user.email)>" "$@"; }; f'
 
+# Jules commits
+git config --global alias.jules-commit '!f() { msg="$1"; shift 1; git -c user.name="google-labs-jules[bot]" -c user.email="noreply@google.com" -c commit.gpgsign=false commit -m "$msg" -m "Signed-off-by: $(git config user.name) <$(git config user.email)>" "$@"; }; f'
+
 # Qwen Code commits
 git config --global alias.qwen-commit '!f() { msg="$1"; shift 1; git -c user.name="Qwen Code" -c user.email="noreply@alibaba.com" -c commit.gpgsign=false commit -m "$msg" -m "Signed-off-by: $(git config user.name) <$(git config user.email)>" "$@"; }; f'
 
@@ -223,6 +228,7 @@ git zed-commit "Fix bug in parser"
 git cursor-commit "Refactor database layer"
 
 # For other AI tools:
+git jules-commit "Add new component"
 git qwen-commit "Optimize algorithm"
 git amp-commit "Add search functionality"
 git droid-commit "Generate unit tests"

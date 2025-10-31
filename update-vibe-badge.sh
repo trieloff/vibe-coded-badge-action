@@ -39,6 +39,7 @@ KIMI_LINES=0
 BOT_LINES=0
 RENOVATE_LINES=0
 SEMANTIC_LINES=0
+JULES_LINES=0
 
 # Find all relevant source files
 SOURCE_FILES=$(find . -type f \
@@ -123,6 +124,10 @@ for FILE in $SOURCE_FILES; do
         # Check for Gemini
         elif echo "$AUTHOR" | grep -i 'gemini' >/dev/null || echo "$AUTHOR_EMAIL" | grep -E 'noreply@google\.com' >/dev/null; then
           GEMINI_LINES=$((GEMINI_LINES + 1))
+          IS_AI=true
+        # Check for Jules
+        elif echo "$AUTHOR" | grep -i 'google-labs-jules\[bot\]' >/dev/null; then
+          JULES_LINES=$((JULES_LINES + 1))
           IS_AI=true
         # Check for Amp (Sourcegraph)
         elif echo "$AUTHOR" | grep -iw 'amp' >/dev/null || echo "$AUTHOR_EMAIL" | grep -E 'noreply@sourcegraph\.com' >/dev/null; then
@@ -230,6 +235,11 @@ if [ "$QWEN_LINES" -gt "$MAX_COUNT" ]; then
   LOGO="alibabacloud"
   DOMINANT_AI="Qwen"
 fi
+if [ "$JULES_LINES" -gt "$MAX_COUNT" ]; then
+  MAX_COUNT="$JULES_LINES"
+  LOGO="google"
+  DOMINANT_AI="Jules"
+fi
 if [ "$AMP_LINES" -gt "$MAX_COUNT" ]; then
   MAX_COUNT="$AMP_LINES"
   LOGO="sourcegraph"
@@ -299,6 +309,7 @@ if $DEBUG; then
   [ "$OPENCODE_LINES" -gt 0 ] && printf "  %-10s: %d lines\n" "OpenCode" "$OPENCODE_LINES"
   [ "$GEMINI_LINES" -gt 0 ] && printf "  %-10s: %d lines\n" "Gemini" "$GEMINI_LINES"
   [ "$QWEN_LINES" -gt 0 ] && printf "  %-10s: %d lines\n" "Qwen" "$QWEN_LINES"
+  [ "$JULES_LINES" -gt 0 ] && printf "  %-10s: %d lines\n" "Jules" "$JULES_LINES"
   [ "$AMP_LINES" -gt 0 ] && printf "  %-10s: %d lines\n" "Amp" "$AMP_LINES"
   [ "$DROID_LINES" -gt 0 ] && printf "  %-10s: %d lines\n" "Droid" "$DROID_LINES"
   [ "$COPILOT_LINES" -gt 0 ] && printf "  %-10s: %d lines\n" "Copilot" "$COPILOT_LINES"
