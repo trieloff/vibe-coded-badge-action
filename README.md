@@ -1,24 +1,25 @@
 # Vibe Coded Badge Action
 
-[![99% Vibe_Coded](https://img.shields.io/badge/99%25-Vibe_Coded-ff69b4?style=for-the-badge&logo=claude&logoColor=white)](https://github.com/trieloff/vibe-coded-badge-action)
+[![98% Vibe_Coded](https://img.shields.io/badge/98%25-Vibe_Coded-ff69b4?style=for-the-badge&logo=claude&logoColor=white)](https://github.com/trieloff/vibe-coded-badge-action)
 
 A GitHub Action that automatically analyzes your repository's git history to determine what percentage of commits were made by AI tools, and updates a badge in your README accordingly.
 
 ![a_futuristic_glow_image](https://github.com/user-attachments/assets/0350cfe6-7631-4613-aa3e-74e2bd53eda4)
 
-## The Vibe Coding Ecosystem
+## Related Projects
 
-This project is part of a suite of tools designed for the emerging world of **vibe coding** - a new AI-assisted software development paradigm where developers guide AI tools through natural language to build software, embracing the collaborative potential of human-AI partnership.
+Part of the **[AI Ecoverse](https://github.com/trieloff/ai-ecoverse)** - a comprehensive ecosystem of tools for AI-assisted development:
 
-### Related Projects
-
-- **[ai-aligned-git](https://github.com/trieloff/ai-aligned-git)** - A humorous Git wrapper that ensures AI coding agents maintain clean, attributed commits and follow best practices
-- **[ai-aligned-gh](https://github.com/trieloff/ai-aligned-gh)** - A transparent GitHub CLI wrapper that automatically detects AI tool usage and ensures proper bot attribution for GitHub actions
-- **[gh-workflow-peek](https://github.com/trieloff/gh-workflow-peek)** - A GitHub CLI extension for intelligently filtering workflow errors, perfect for AI agents working with limited context windows
+- **[yolo](https://github.com/trieloff/yolo)** - AI CLI launcher with worktree isolation
+- **[ai-aligned-git](https://github.com/trieloff/ai-aligned-git)** - Git wrapper for safe AI commit practices
+- **[ai-aligned-gh](https://github.com/trieloff/ai-aligned-gh)** - GitHub CLI wrapper for proper AI attribution
+- **[gh-workflow-peek](https://github.com/trieloff/gh-workflow-peek)** - Smarter GitHub Actions log filtering
+- **[upskill](https://github.com/trieloff/upskill)** - Install Claude/Agent skills from other repositories
+- **[as-a-bot](https://github.com/trieloff/as-a-bot)** - GitHub App token broker for proper AI attribution
 
 ## Features
 
-- **Smart AI Detection**: Identifies commits from Claude, Cursor, Zed, Windsurf, OpenAI, Codex, Gemini, Jules, and various bots
+- **Smart AI Detection**: Identifies commits from Claude, Cursor, Zed, Windsurf, OpenAI, Codex, Gemini, Jules, Qwen, Amp, Droid, GitHub Copilot, Aider, Cline, Crush, Kimi, and various bots
 - **Dynamic Logo Selection**: Automatically chooses the logo based on which AI tool contributed the most
 - **Flexible Configuration**: Customizable badge style, colors, text, and target file
 - **Debug Mode**: Detailed analysis of commit classification
@@ -95,8 +96,18 @@ The action identifies AI-generated code by analyzing git blame data:
    - Zed
    - Windsurf
    - OpenAI
+   - OpenCode
    - Gemini (Google)
    - Jules
+   - Qwen (Alibaba)
+   - Amp (Sourcegraph)
+   - Droid (Factory AI)
+   - GitHub Copilot
+   - Aider
+   - Cline
+   - Crush (Charm)
+   - Kimi (Moonshot AI)
+   - Terragon
    - Various bot accounts
 3. **Line Filtering**: Filters out boilerplate lines (comments, empty lines, imports) for accuracy
 4. **File Type Support**: Analyzes source files across multiple programming languages
@@ -107,12 +118,21 @@ The action identifies AI-generated code by analyzing git blame data:
 The badge automatically selects the appropriate logo based on which AI tool has the most commits:
 
 - **Claude** → `claude` logo
-- **Codex** → `openai` logo  
+- **Terragon** → `claude` logo
+- **Codex** → `openai` logo
 - **Windsurf** → `windsurf` logo
 - **Cursor** → `githubcopilot` logo
 - **Zed** → `zedindustries` logo
 - **Gemini** → `google` logo
 - **Jules** → `google` logo
+- **Qwen** → `alibabacloud` logo
+- **Amp** → `sourcegraph` logo
+- **Droid** → `robot` logo
+- **GitHub Copilot** → `githubcopilot` logo
+- **Aider** → `openai` logo
+- **Cline** → `claude` logo
+- **Crush** → `robot` logo
+- **Kimi** → `openai` logo
 - **Renovate** → `renovatebot` logo
 - **Semantic Release** → `semanticrelease` logo
 - **Other Bots** → `githubactions` logo
@@ -164,6 +184,33 @@ git config --global alias.openai-commit '!f() { msg="$1"; shift 1; git -c user.n
 
 # Gemini commits
 git config --global alias.gemini-commit '!f() { msg="$1"; shift 1; git -c user.name="Gemini" -c user.email="noreply@google.com" -c commit.gpgsign=false commit -m "$msg" -m "Signed-off-by: $(git config user.name) <$(git config user.email)>" "$@"; }; f'
+
+# Jules commits
+git config --global alias.jules-commit '!f() { msg="$1"; shift 1; git -c user.name="google-labs-jules[bot]" -c user.email="noreply@google.com" -c commit.gpgsign=false commit -m "$msg" -m "Signed-off-by: $(git config user.name) <$(git config user.email)>" "$@"; }; f'
+
+# Qwen Code commits
+git config --global alias.qwen-commit '!f() { msg="$1"; shift 1; git -c user.name="Qwen Code" -c user.email="noreply@alibaba.com" -c commit.gpgsign=false commit -m "$msg" -m "Signed-off-by: $(git config user.name) <$(git config user.email)>" "$@"; }; f'
+
+# Amp (Sourcegraph) commits
+git config --global alias.amp-commit '!f() { msg="$1"; shift 1; git -c user.name="Amp" -c user.email="noreply@sourcegraph.com" -c commit.gpgsign=false commit -m "$msg" -m "Signed-off-by: $(git config user.name) <$(git config user.email)>" "$@"; }; f'
+
+# Droid (Factory AI) commits
+git config --global alias.droid-commit '!f() { msg="$1"; shift 1; git -c user.name="Droid" -c user.email="droid@factory.ai" -c commit.gpgsign=false commit -m "$msg" -m "Signed-off-by: $(git config user.name) <$(git config user.email)>" "$@"; }; f'
+
+# GitHub Copilot commits
+git config --global alias.copilot-commit '!f() { msg="$1"; shift 1; git -c user.name="GitHub Copilot" -c user.email="copilot@github.com" -c commit.gpgsign=false commit -m "$msg" -m "Signed-off-by: $(git config user.name) <$(git config user.email)>" "$@"; }; f'
+
+# Aider commits
+git config --global alias.aider-commit '!f() { msg="$1"; shift 1; git -c user.name="$(git config user.name) (aider)" -c user.email="aider@aider.chat" -c commit.gpgsign=false commit -m "$msg" -m "Signed-off-by: $(git config user.name) <$(git config user.email)>" "$@"; }; f'
+
+# Cline commits
+git config --global alias.cline-commit '!f() { msg="$1"; shift 1; git -c user.name="Cline" -c user.email="noreply@cline.bot" -c commit.gpgsign=false commit -m "$msg" -m "Signed-off-by: $(git config user.name) <$(git config user.email)>" "$@"; }; f'
+
+# Crush commits
+git config --global alias.crush-commit '!f() { msg="$1"; shift 1; git -c user.name="Crush" -c user.email="crush@charm.land" -c commit.gpgsign=false commit -m "$msg" -m "Signed-off-by: $(git config user.name) <$(git config user.email)>" "$@"; }; f'
+
+# Kimi commits
+git config --global alias.kimi-commit '!f() { msg="$1"; shift 1; git -c user.name="Kimi" -c user.email="noreply@moonshot.ai" -c commit.gpgsign=false commit -m "$msg" -m "Signed-off-by: $(git config user.name) <$(git config user.email)>" "$@"; }; f'
 ```
 
 ### Usage
@@ -174,11 +221,22 @@ Instead of regular `git commit`, use the AI-specific aliases:
 # Instead of: git commit -m "Add new feature"
 git claude-commit "Add new feature"
 
-# Instead of: git commit -m "Fix bug in parser"  
+# Instead of: git commit -m "Fix bug in parser"
 git zed-commit "Fix bug in parser"
 
 # Instead of: git commit -m "Refactor database layer"
 git cursor-commit "Refactor database layer"
+
+# For other AI tools:
+git jules-commit "Add new component"
+git qwen-commit "Optimize algorithm"
+git amp-commit "Add search functionality"
+git droid-commit "Generate unit tests"
+git copilot-commit "Implement feature X"
+git aider-commit "Refactor module structure"
+git cline-commit "Add validation logic"
+git crush-commit "Improve error messages"
+git kimi-commit "Implement new API endpoint"
 ```
 
 ### Benefits

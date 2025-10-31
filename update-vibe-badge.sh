@@ -29,6 +29,13 @@ OPENCODE_LINES=0
 TERRAGON_LINES=0
 GEMINI_LINES=0
 QWEN_LINES=0
+AMP_LINES=0
+DROID_LINES=0
+COPILOT_LINES=0
+AIDER_LINES=0
+CLINE_LINES=0
+CRUSH_LINES=0
+KIMI_LINES=0
 BOT_LINES=0
 RENOVATE_LINES=0
 SEMANTIC_LINES=0
@@ -122,6 +129,34 @@ for FILE in $SOURCE_FILES; do
         elif echo "$AUTHOR" | grep -i 'google-labs-jules\[bot\]' >/dev/null; then
           JULES_LINES=$((JULES_LINES + 1))
           IS_AI=true
+        # Check for Amp (Sourcegraph)
+        elif echo "$AUTHOR" | grep -iw 'amp' >/dev/null || echo "$AUTHOR_EMAIL" | grep -E 'noreply@sourcegraph\.com' >/dev/null; then
+          AMP_LINES=$((AMP_LINES + 1))
+          IS_AI=true
+        # Check for Droid (Factory AI)
+        elif echo "$AUTHOR" | grep -iw 'droid' >/dev/null || echo "$AUTHOR_EMAIL" | grep -E 'droid@factory\.ai' >/dev/null; then
+          DROID_LINES=$((DROID_LINES + 1))
+          IS_AI=true
+        # Check for GitHub Copilot
+        elif echo "$AUTHOR" | grep -i 'copilot' >/dev/null || echo "$AUTHOR_EMAIL" | grep -E 'copilot@github\.com' >/dev/null; then
+          COPILOT_LINES=$((COPILOT_LINES + 1))
+          IS_AI=true
+        # Check for Aider (via author name or co-authored-by)
+        elif echo "$AUTHOR" | grep -iE '\(aider\)|^aider' >/dev/null || echo "$AUTHOR_EMAIL" | grep -E 'aider@aider\.chat' >/dev/null || git show --format=%B "$COMMIT_HASH" 2>/dev/null | grep -iE 'Co-authored-by:.*aider' >/dev/null; then
+          AIDER_LINES=$((AIDER_LINES + 1))
+          IS_AI=true
+        # Check for Cline
+        elif echo "$AUTHOR" | grep -iw 'cline' >/dev/null || echo "$AUTHOR_EMAIL" | grep -iE 'cline@|noreply@cline\.bot' >/dev/null; then
+          CLINE_LINES=$((CLINE_LINES + 1))
+          IS_AI=true
+        # Check for Crush (Charm)
+        elif echo "$AUTHOR" | grep -iw 'crush' >/dev/null || echo "$AUTHOR_EMAIL" | grep -E 'crush@charm\.land' >/dev/null; then
+          CRUSH_LINES=$((CRUSH_LINES + 1))
+          IS_AI=true
+        # Check for Kimi (Moonshot AI)
+        elif echo "$AUTHOR" | grep -iw 'kimi' >/dev/null || echo "$AUTHOR_EMAIL" | grep -E 'kimi@moonshot\.' >/dev/null; then
+          KIMI_LINES=$((KIMI_LINES + 1))
+          IS_AI=true
         # Check for bots
         elif echo "$AUTHOR" | grep -i '\[bot\]' >/dev/null || echo "$AUTHOR" | grep -iE 'renovate|semantic-release' >/dev/null; then
           if echo "$AUTHOR" | grep -i 'renovate' >/dev/null; then
@@ -205,6 +240,41 @@ if [ "$JULES_LINES" -gt "$MAX_COUNT" ]; then
   LOGO="google"
   DOMINANT_AI="Jules"
 fi
+if [ "$AMP_LINES" -gt "$MAX_COUNT" ]; then
+  MAX_COUNT="$AMP_LINES"
+  LOGO="sourcegraph"
+  DOMINANT_AI="Amp"
+fi
+if [ "$DROID_LINES" -gt "$MAX_COUNT" ]; then
+  MAX_COUNT="$DROID_LINES"
+  LOGO="robot"
+  DOMINANT_AI="Droid"
+fi
+if [ "$COPILOT_LINES" -gt "$MAX_COUNT" ]; then
+  MAX_COUNT="$COPILOT_LINES"
+  LOGO="githubcopilot"
+  DOMINANT_AI="Copilot"
+fi
+if [ "$AIDER_LINES" -gt "$MAX_COUNT" ]; then
+  MAX_COUNT="$AIDER_LINES"
+  LOGO="openai"
+  DOMINANT_AI="Aider"
+fi
+if [ "$CLINE_LINES" -gt "$MAX_COUNT" ]; then
+  MAX_COUNT="$CLINE_LINES"
+  LOGO="claude"
+  DOMINANT_AI="Cline"
+fi
+if [ "$CRUSH_LINES" -gt "$MAX_COUNT" ]; then
+  MAX_COUNT="$CRUSH_LINES"
+  LOGO="robot"
+  DOMINANT_AI="Crush"
+fi
+if [ "$KIMI_LINES" -gt "$MAX_COUNT" ]; then
+  MAX_COUNT="$KIMI_LINES"
+  LOGO="openai"
+  DOMINANT_AI="Kimi"
+fi
 if [ "$BOT_LINES" -gt "$MAX_COUNT" ]; then
   MAX_COUNT="$BOT_LINES"
   LOGO="githubactions"
@@ -240,6 +310,13 @@ if $DEBUG; then
   [ "$GEMINI_LINES" -gt 0 ] && printf "  %-10s: %d lines\n" "Gemini" "$GEMINI_LINES"
   [ "$QWEN_LINES" -gt 0 ] && printf "  %-10s: %d lines\n" "Qwen" "$QWEN_LINES"
   [ "$JULES_LINES" -gt 0 ] && printf "  %-10s: %d lines\n" "Jules" "$JULES_LINES"
+  [ "$AMP_LINES" -gt 0 ] && printf "  %-10s: %d lines\n" "Amp" "$AMP_LINES"
+  [ "$DROID_LINES" -gt 0 ] && printf "  %-10s: %d lines\n" "Droid" "$DROID_LINES"
+  [ "$COPILOT_LINES" -gt 0 ] && printf "  %-10s: %d lines\n" "Copilot" "$COPILOT_LINES"
+  [ "$AIDER_LINES" -gt 0 ] && printf "  %-10s: %d lines\n" "Aider" "$AIDER_LINES"
+  [ "$CLINE_LINES" -gt 0 ] && printf "  %-10s: %d lines\n" "Cline" "$CLINE_LINES"
+  [ "$CRUSH_LINES" -gt 0 ] && printf "  %-10s: %d lines\n" "Crush" "$CRUSH_LINES"
+  [ "$KIMI_LINES" -gt 0 ] && printf "  %-10s: %d lines\n" "Kimi" "$KIMI_LINES"
   [ "$BOT_LINES" -gt 0 ] && printf "  %-10s: %d lines\n" "Bot" "$BOT_LINES"
   [ "$RENOVATE_LINES" -gt 0 ] && printf "  %-10s: %d lines\n" "Renovate" "$RENOVATE_LINES"
   [ "$SEMANTIC_LINES" -gt 0 ] && printf "  %-10s: %d lines\n" "Semantic" "$SEMANTIC_LINES"
